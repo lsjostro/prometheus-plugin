@@ -1,4 +1,4 @@
 .idea
-*.impl
+*.iml
 target
 work
