@@ -1,17 +1,19 @@
-package org.jenkinsci.plugins.prometheus-plugins.rest;
+package org.jenkinsci.plugins.prometheus.rest;
 
 import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
 import io.prometheus.client.CollectorRegistry;
-import org.jenkinsci.plugins.fabric8.prometheus.JobCollector;
-import org.jenkinsci.plugins.fabric8.prometheus.MetricsRequest;
+import io.prometheus.client.dropwizard.DropwizardExports;
+import jenkins.metrics.api.Metrics;
+import org.jenkinsci.plugins.prometheus.JobCollector;
+import org.jenkinsci.plugins.prometheus.MetricsRequest;
 
-/**
- */
 @Extension
 public class PrometheusAction implements UnprotectedRootAction {
     private CollectorRegistry collectorRegistry;
     private JobCollector jobCollector = new JobCollector();
+    private static final String DEFAULT_ENDPOINT = "prometheus";
+    private String prometheusEndpoint;
 
     @Override
     public String getIconFileName() {
@@ -25,14 +27,19 @@ public class PrometheusAction implements UnprotectedRootAction {
 
     @Override
     public String getUrlName() {
-        return "prometheus";
+        prometheusEndpoint = System.getenv("PROMETHEUS_ENDPOINT");
+        if (prometheusEndpoint == null || prometheusEndpoint.length() == 0) {
+            prometheusEndpoint = DEFAULT_ENDPOINT;
+        }
+        return prometheusEndpoint;
     }
 
     public Object doIndex() {
         if (collectorRegistry == null) {
             collectorRegistry = CollectorRegistry.defaultRegistry;
             collectorRegistry.register(jobCollector);
+            collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
         }
-        return MetricsRequest.jsonResponse(collectorRegistry);
+        return MetricsRequest.prometheusResponse(collectorRegistry);
     }
 }
