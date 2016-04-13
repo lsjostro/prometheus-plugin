@@ -29,6 +29,8 @@ public class JobCollector extends Collector {
     private String fullname = "builds";
     private String subsystem = "jenkins";
     private String namespace;
+    private Summary summary;
+    private Summary stageSummary;
 
     public JobCollector() {
         namespace = System.getenv("PROMETHEUS_NAMESPACE");
@@ -41,6 +43,20 @@ public class JobCollector extends Collector {
     public List<MetricFamilySamples> collect() {
         final List<MetricFamilySamples> samples = new ArrayList<MetricFamilySamples>();
         final List<Job> jobs = new ArrayList<Job>();
+
+        String[] labelNameArray = {"job"};
+        String[] labelStageNameArray = {"job", "stage"};
+        summary = Summary.build().
+                name(fullname + "_duration_milliseconds_summary").
+                subsystem(subsystem).namespace(namespace).
+                labelNames(labelNameArray).
+                help("Summary of Jenkins build times in milliseconds by Job").
+                create();
+        stageSummary = Summary.build().name(fullname + "_stage_duration_milliseconds_summary").
+                subsystem(subsystem).namespace(namespace).
+                labelNames(labelStageNameArray).
+                help("Summary of Jenkins build times by Job and Stage").
+                create();
 
         Jobs.forEachJob(new Callback<Job>() {
             @Override
@@ -55,22 +71,15 @@ public class JobCollector extends Collector {
                 appendJobMetrics(samples, job);
             }
         });
+        if (summary.collect().get(0).samples.size() > 0)
+            samples.addAll(summary.collect());
+        if (stageSummary.collect().get(0).samples.size() > 0)
+            samples.addAll(stageSummary.collect());
         return samples;
     }
 
     protected void appendJobMetrics(List<MetricFamilySamples> mfsList, Job job) {
-        String[] labelNameArray = {"job"};
         String[] labelValueArray = {job.getFullName()};
-
-        Summary summary = Summary.build().
-                name(fullname + "_duration_milliseconds_summary").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Summary of Jenkins build times in milliseconds by Job").
-                create();
-
-        Map<String,Summary> stageCollectorMap = new HashMap<String, Summary>();
-
         RunList<Run> builds = job.getBuilds();
         if (builds != null) {
             for (Run build : builds) {
@@ -85,38 +94,21 @@ public class JobCollector extends Collector {
                         }
                         List<FlowNode> stages = getSortedStageNodes(workflowRun.getExecution());
                         for (FlowNode stage : stages) {
-                            observeStage(stageCollectorMap, job, build, stage);
+                            observeStage(job, build, stage);
                         }
                     }
                 }
             }
         }
-
-        mfsList.addAll(summary.collect());
-        Collection<Summary> stageCollectors = stageCollectorMap.values();
-        for (Summary stageCollector : stageCollectors) {
-            mfsList.addAll(stageCollector.collect());
-        }
     }
 
-    private void observeStage(Map<String, Summary> histogramMap, Job job, Run build, FlowNode stage) {
+    private void observeStage(Job job, Run build, FlowNode stage) {
         String jobName = job.getFullName();
         String stageName = stage.getDisplayName();
-        String[] labelNameArray = {"job", "stage"};
         String[] labelValueArray = {jobName, stageName};
 
-        String key = jobName + "_" + stageName;
-        Summary collector = histogramMap.get(key);
-        if (collector == null) {
-            collector = Summary.build().name(fullname + "_stage_duration_milliseconds_summary").
-                    subsystem(subsystem).namespace(namespace).
-                            labelNames(labelNameArray).
-                    help("Summary of Jenkins build times by Job and Stage").
-                    create();
-            histogramMap.put(key, collector);
-        }
         long duration = FlowNodes.getStageDuration(stage);
-        collector.labels(labelValueArray).observe(duration);
+        LOG.warning(stageName);
+        stageSummary.labels(labelValueArray).observe(duration);
     }
-
 }

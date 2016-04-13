@@ -9,12 +9,12 @@
     <relativePath></relativePath>
   </parent>
   <groupId>org.jenkins-ci.plugins</groupId>
-  <artifactId>prometheus-plugin</artifactId>
-  <version>1.0</version>
+  <artifactId>prometheus</artifactId>
+  <version>1.0.3</version>
   <packaging>hpi</packaging>
 
   <name>Prometheus metrics plugin</name>
-  <description>export jenkins metrics to a prometheus format</description>
+  <description>Export Jenkins metrics in prometheus format</description>
 
   <url></url>
   <inceptionYear>2016</inceptionYear>
@@ -26,7 +26,7 @@
 
   <organization>
     <name>Radicore AB</name>
-    <url>http://radicore.se</url>
+    <url>http://www.radicore.se</url>
   </organization>
 
   <licenses>
@@ -39,7 +39,7 @@
 
   <developers>
     <developer>
-      <id>developer</id>
+      <id>devguy</id>
       <name>Lars Sjostrom</name>
       <organization>Radicore AB</organization>
       <organizationUrl>http://www.radicore.se/</organizationUrl>
@@ -47,9 +47,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:lsjostro/prometheus-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:lsjostro/prometheus-plugin.git</developerConnection>
-    <url>http://github.com/lsjostro/prometheus-plugin/</url>
+    <connection>scm:git:git@github.com:jenkinsci/prometheus-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/prometheus-plugin.git</developerConnection>
+    <url>http://github.com/jenkinsci/prometheus-plugin/</url>
     <tag>${project.version}</tag>
   </scm>
 

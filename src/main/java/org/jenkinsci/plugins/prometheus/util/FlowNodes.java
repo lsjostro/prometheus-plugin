@@ -77,7 +77,6 @@ public class FlowNodes {
                     for (FlowNode old : answer) {
                         if (Objects.equal(old.getId(), node.getId())) {
                             // already added
-                            LOG.warning("Already added:" + old.getId());
                             return;
                         }
                     }

@@ -38,7 +38,9 @@ public class PrometheusAction implements UnprotectedRootAction {
         if (collectorRegistry == null) {
             collectorRegistry = CollectorRegistry.defaultRegistry;
             collectorRegistry.register(jobCollector);
-            collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
+            if (Metrics.metricRegistry() != null) {
+                collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
+            }
         }
         return MetricsRequest.prometheusResponse(collectorRegistry);
     }
