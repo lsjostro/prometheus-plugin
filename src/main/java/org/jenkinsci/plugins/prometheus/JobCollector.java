@@ -35,8 +35,8 @@ public class JobCollector extends Collector {
 
     @Override
     public List<MetricFamilySamples> collect() {
-        final List<MetricFamilySamples> samples = new ArrayList<MetricFamilySamples>();
-        final List<Job> jobs = new ArrayList<Job>();
+        final List<MetricFamilySamples> samples = new ArrayList<>();
+        final List<Job> jobs = new ArrayList<>();
         final String fullname = "builds";
         final String subsystem = "jenkins";
         String[] labelNameArray = {"job"};
@@ -77,29 +77,30 @@ public class JobCollector extends Collector {
 
     protected void appendJobMetrics(Job job) {
         String[] labelValueArray = {job.getFullName()};
-        Run build = job.getLastBuild();
-        while (build != null) {
-            if (Runs.includeBuildInMetrics(build)) {
-                long buildDuration = build.getDuration();
+        Run run = job.getLastBuild();
+        while (run != null) {
+            if (Runs.includeBuildInMetrics(run)) {
+                long buildDuration = run.getDuration();
                 summary.labels(labelValueArray).observe(buildDuration);
 
-                if (build instanceof WorkflowRun) {
-                    WorkflowRun workflowRun = (WorkflowRun) build;
+                if (run instanceof WorkflowRun) {
+                    WorkflowRun workflowRun = (WorkflowRun) run;
                     if (workflowRun.getExecution() == null) {
+                        run = run.getPreviousBuild();
                         continue;
                     }
                     try {
                         List<FlowNode> stages = getSortedStageNodes(workflowRun.getExecution());
                         for (FlowNode stage : stages) {
-                            observeStage(job, build, stage);
+                            observeStage(job, run, stage);
                         }
                     } catch (final NullPointerException e){}
                 }
             }
-            build = build.getPreviousBuild();
+            run = run.getPreviousBuild();
         }
     }
-    private void observeStage(Job job, Run build, FlowNode stage) {
+    private void observeStage(Job job, Run run, FlowNode stage) {
         String jobName = job.getFullName();
         String stageName = stage.getDisplayName();
         String[] labelValueArray = {jobName, stageName};

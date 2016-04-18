@@ -12,7 +12,7 @@
   <version>1.0.6-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>Prometheus metrics plugin</name>
-  <description>Export Jenkins metrics in prometheus format</description>
+  <description>Expose Jenkins metrics in prometheus format</description>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/Prometheus+Plugin</url>
   <inceptionYear>2016</inceptionYear>
 
