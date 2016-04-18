@@ -89,16 +89,17 @@ public class JobCollector extends Collector {
                         if (workflowRun.getExecution() == null) {
                             continue;
                         }
-                        List<FlowNode> stages = getSortedStageNodes(workflowRun.getExecution());
-                        for (FlowNode stage : stages) {
-                            observeStage(job, build, stage);
-                        }
+                        try {
+                            List<FlowNode> stages = getSortedStageNodes(workflowRun.getExecution());
+                            for (FlowNode stage : stages) {
+                                observeStage(job, build, stage);
+                            }
+                        } catch (final NullPointerException e){}
                     }
                 }
             }
         }
     }
-
     private void observeStage(Job job, Run build, FlowNode stage) {
         String jobName = job.getFullName();
         String stageName = stage.getDisplayName();
