@@ -2,9 +2,9 @@ package org.jenkinsci.plugins.prometheus;
 
 import hudson.model.Job;
 import hudson.model.Run;
-import hudson.util.RunList;
 import io.prometheus.client.Collector;
 import io.prometheus.client.Summary;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.prometheus.util.Callback;
 import org.jenkinsci.plugins.prometheus.util.FlowNodes;
 import org.jenkinsci.plugins.prometheus.util.Jobs;
@@ -28,7 +28,7 @@ public class JobCollector extends Collector {
 
     public JobCollector() {
         namespace = System.getenv("PROMETHEUS_NAMESPACE");
-        if (namespace == null || namespace.length() == 0) {
+        if (StringUtils.isEmpty(namespace)) {
             namespace = DEFAULT_NAMESPACE;
         }
     }
@@ -77,27 +77,26 @@ public class JobCollector extends Collector {
 
     protected void appendJobMetrics(Job job) {
         String[] labelValueArray = {job.getFullName()};
-        RunList<Run> builds = job.getBuilds();
-        if (builds != null) {
-            for (Run build : builds) {
-                if (Runs.includeBuildInMetrics(build)) {
-                    long buildDuration = build.getDuration();
-                    summary.labels(labelValueArray).observe(buildDuration);
+        Run build = job.getLastBuild();
+        while (build != null) {
+            if (Runs.includeBuildInMetrics(build)) {
+                long buildDuration = build.getDuration();
+                summary.labels(labelValueArray).observe(buildDuration);
 
-                    if (build instanceof WorkflowRun) {
-                        WorkflowRun workflowRun = (WorkflowRun) build;
-                        if (workflowRun.getExecution() == null) {
-                            continue;
-                        }
-                        try {
-                            List<FlowNode> stages = getSortedStageNodes(workflowRun.getExecution());
-                            for (FlowNode stage : stages) {
-                                observeStage(job, build, stage);
-                            }
-                        } catch (final NullPointerException e){}
+                if (build instanceof WorkflowRun) {
+                    WorkflowRun workflowRun = (WorkflowRun) build;
+                    if (workflowRun.getExecution() == null) {
+                        continue;
                     }
+                    try {
+                        List<FlowNode> stages = getSortedStageNodes(workflowRun.getExecution());
+                        for (FlowNode stage : stages) {
+                            observeStage(job, build, stage);
+                        }
+                    } catch (final NullPointerException e){}
                 }
             }
+            build = build.getPreviousBuild();
         }
     }
     private void observeStage(Job job, Run build, FlowNode stage) {
