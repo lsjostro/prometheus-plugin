@@ -143,9 +143,8 @@ public class FlowNodes {
         if (endNode != null) {
             long endTime = TimingAction.getStartTime(endNode);
             return endTime - startTime;
-        } else {
-            return 0;
         }
+        return 0;
     }
 
 }
