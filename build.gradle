@@ -1,0 +1,48 @@
+plugins{
+  id 'java'
+  id 'maven'
+  id 'eclipse'
+}
+
+group = 'org.jenkins-ci.plugins'
+version = '1.0.6-SNAPSHOT'
+
+description = """Prometheus metrics plugin"""
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+     maven { url "http://repo.jenkins-ci.org/public/" }
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+dependencies {
+    compile 'org.jenkins-ci.main:jenkins-core:1.625.3',
+    'org.jenkins-ci.plugins.workflow:workflow-api:1.8@jar',
+    'org.jenkins-ci.plugins.workflow:workflow-job:1.8@jar',
+    'org.apache.httpcomponents:httpcore:4.4',
+    'org.jenkins-ci.plugins:metrics:3.1.2.7@jar',
+    'com.google.code.gson:gson:2.3.1',
+    'io.prometheus:simpleclient:0.0.14',
+    'io.prometheus:simpleclient_common:0.0.14',
+    'io.prometheus:simpleclient_dropwizard:0.0.14',
+    'javax.servlet:servlet-api:2.4',
+    'org.slf4j:slf4j-api:1.7.7'
+    
+    testCompile 'org.jenkins-ci.main:jenkins-war:1.625.3:war-for-test',
+    'org.jenkins-ci.main:jenkins-war:1.625.3',
+    'org.jenkins-ci.main:jenkins-test-harness:2.1',
+    'org.jenkins-ci:test-annotations:1.2',
+    'junit:junit:4.12',
+    'org.slf4j:log4j-over-slf4j:1.7.7',
+    'org.slf4j:jcl-over-slf4j:1.7.7',
+    'org.slf4j:slf4j-jdk14:1.7.7'
+}
+
+task dumpDependencies(type: Copy) {
+  description "Copy all project dependencies into ${buildDir}/dependencyLi    bs"
+  into "$buildDir/dependencyLibs"
+  //include all dependencies, even test
+  from configurations.testRuntime
+}
