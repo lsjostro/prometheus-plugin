@@ -1,19 +1,21 @@
 package org.jenkinsci.plugins.prometheus.rest;
 
 import hudson.Extension;
+import hudson.model.RootAction;
 import hudson.model.UnprotectedRootAction;
+import hudson.util.HttpResponses;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
 import jenkins.metrics.api.Metrics;
 import org.jenkinsci.plugins.prometheus.JobCollector;
 import org.jenkinsci.plugins.prometheus.MetricsRequest;
+import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
+import org.kohsuke.stapler.StaplerRequest;
 
 @Extension
 public class PrometheusAction implements UnprotectedRootAction {
     private CollectorRegistry collectorRegistry;
     private JobCollector jobCollector = new JobCollector();
-    private static final String DEFAULT_ENDPOINT = "prometheus";
-    private String prometheusEndpoint;
 
     @Override
     public String getIconFileName() {
@@ -27,21 +29,20 @@ public class PrometheusAction implements UnprotectedRootAction {
 
     @Override
     public String getUrlName() {
-        prometheusEndpoint = System.getenv("PROMETHEUS_ENDPOINT");
-        if (prometheusEndpoint == null || prometheusEndpoint.length() == 0) {
-            prometheusEndpoint = DEFAULT_ENDPOINT;
-        }
-        return prometheusEndpoint;
+        return PrometheusConfiguration.get().getUrlName();
     }
 
-    public Object doIndex() {
-        if (collectorRegistry == null) {
-            collectorRegistry = CollectorRegistry.defaultRegistry;
-            collectorRegistry.register(jobCollector);
-            if (Metrics.metricRegistry() != null) {
-                collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
+    public Object doDynamic(StaplerRequest request) {
+        if (request.getRestOfPath().equals(PrometheusConfiguration.get().getAdditionalPath())) {
+            if (collectorRegistry == null) {
+                collectorRegistry = CollectorRegistry.defaultRegistry;
+                collectorRegistry.register(jobCollector);
+                if (Metrics.metricRegistry() != null) {
+                    collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
+                }
             }
+            return MetricsRequest.prometheusResponse(collectorRegistry);
         }
-        return MetricsRequest.prometheusResponse(collectorRegistry);
+        throw HttpResponses.notFound();
     }
 }
