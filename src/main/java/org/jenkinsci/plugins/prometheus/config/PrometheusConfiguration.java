@@ -25,6 +25,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     private String urlName;
     private String additionalPath;
+    private boolean useAuthenticatedEndpoint;
 
     public PrometheusConfiguration() {
         load();
@@ -42,8 +43,13 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         setPath(json.getString("path"));
+        useAuthenticatedEndpoint = json.getBoolean("useAuthenticatedEndpoint");
         save();
         return super.configure(req, json);
+    }
+
+    public String getPath() {
+        return StringUtils.isEmpty(additionalPath) ? urlName : urlName + "/" + additionalPath;
     }
 
     public void setPath(String path) {
@@ -52,8 +58,12 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         additionalPath = (pathParts.size() > 1 ? "/" : "") + StringUtils.join(pathParts.subList(1, pathParts.size()), "/");
     }
 
-    public String getPath() {
-        return StringUtils.isEmpty(additionalPath) ? urlName : urlName + "/" + additionalPath;
+    public boolean isUseAuthenticatedEndpoint() {
+        return useAuthenticatedEndpoint;
+    }
+
+    void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
+        this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
     }
 
     public String getUrlName() {
