@@ -1,0 +1,8 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <div>
+    <p>
+      The path where the prometheus metrics should be provided.
+    </p>
+  </div>
+</j:jelly>
