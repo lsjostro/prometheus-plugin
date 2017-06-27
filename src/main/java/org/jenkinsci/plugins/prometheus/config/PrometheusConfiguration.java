@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.prometheus.config;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
+import hudson.model.Result;
 import hudson.util.FormValidation;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
@@ -13,6 +14,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.EnumSet;
 
 /**
  * @author Robin Müller
@@ -26,6 +28,13 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private String urlName;
     private String additionalPath;
     private boolean useAuthenticatedEndpoint;
+    
+    private boolean countSuccessfulBuilds = true;
+    private boolean countUnstableBuilds = true;
+    private boolean countFailedBuilds = true;
+    private boolean countNotBuiltBuilds = true;
+    private boolean countAbortedBuilds = true;
+    
 
     public PrometheusConfiguration() {
         load();
@@ -44,6 +53,13 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         setPath(json.getString("path"));
         useAuthenticatedEndpoint = json.getBoolean("useAuthenticatedEndpoint");
+
+        countSuccessfulBuilds = json.getBoolean("countSuccessfulBuilds");
+        countUnstableBuilds = json.getBoolean("countUnstableBuilds");
+        countFailedBuilds = json.getBoolean("countFailedBuilds");
+        countNotBuiltBuilds = json.getBoolean("countNotBuiltBuilds");
+        countAbortedBuilds = json.getBoolean("countAbortedBuilds");
+        
         save();
         return super.configure(req, json);
     }
@@ -64,6 +80,46 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
+    }
+    
+    public boolean isCountSuccessfulBuilds() {
+        return countSuccessfulBuilds;
+    }
+    
+    void setCountSuccessfulBuilds(boolean countSuccessfulBuilds) {
+        this.countSuccessfulBuilds = countSuccessfulBuilds;
+    }
+
+    public boolean isCountUnstableBuilds() {
+        return countUnstableBuilds;
+    }
+    
+    void setCountUnstableBuilds(boolean countUnstableBuilds) {
+        this.countUnstableBuilds = countUnstableBuilds;
+    }
+
+    public boolean isCountFailedBuilds() {
+        return countFailedBuilds;
+    }
+    
+    void setCountFailedBuilds(boolean countFailedBuilds) {
+        this.countSuccessfulBuilds = countFailedBuilds;
+    }
+
+    public boolean isCountNotBuiltBuilds() {
+        return countNotBuiltBuilds;
+    }
+    
+    void setCountNotBuiltBuilds(boolean countNotBuiltBuilds) {
+        this.countNotBuiltBuilds = countNotBuiltBuilds;
+    }
+
+    public boolean isCountAbortedBuilds() {
+        return countAbortedBuilds;
+    }
+    
+    void setCountAbortedBuilds(boolean countAbortedBuilds) {
+        this.countAbortedBuilds = countAbortedBuilds;
     }
 
     public String getUrlName() {
