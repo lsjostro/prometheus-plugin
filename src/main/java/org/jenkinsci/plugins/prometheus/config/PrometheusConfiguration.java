@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.prometheus.config;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
-import hudson.model.Result;
 import hudson.util.FormValidation;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
@@ -14,7 +13,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.EnumSet;
 
 /**
  * @author Robin Müller
