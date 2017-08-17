@@ -4,6 +4,7 @@ import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.Result;
 import hudson.model.Run;
+import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +12,25 @@ import java.util.Map;
 
 public class Runs {
     public static boolean includeBuildInMetrics(Run build) {
-        return !build.isBuilding();
+        boolean include = false;
+        if (!build.isBuilding()) {
+            include = true;
+            Result result = build.getResult();
+            if (result != null) {
+                if (result == Result.ABORTED) {  
+                    include = PrometheusConfiguration.get().isCountAbortedBuilds();
+                } else if (result == Result.FAILURE) {  
+                    include = PrometheusConfiguration.get().isCountFailedBuilds();
+                } else if (result == Result.NOT_BUILT) {  
+                    include = PrometheusConfiguration.get().isCountNotBuiltBuilds();
+                } else if (result == Result.SUCCESS) {  
+                    include = PrometheusConfiguration.get().isCountSuccessfulBuilds();
+                } else if (result == Result.UNSTABLE) {  
+                    include = PrometheusConfiguration.get().isCountUnstableBuilds();
+                }
+            }
+        }    
+        return include;
     }
 
     public static String getResultText(Run run) {
