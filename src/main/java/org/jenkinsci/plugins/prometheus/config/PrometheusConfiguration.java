@@ -101,7 +101,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     }
     
     void setCountFailedBuilds(boolean countFailedBuilds) {
-        this.countSuccessfulBuilds = countFailedBuilds;
+        this.countFailedBuilds = countFailedBuilds;
     }
 
     public boolean isCountNotBuiltBuilds() {
