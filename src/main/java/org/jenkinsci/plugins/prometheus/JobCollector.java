@@ -58,6 +58,7 @@ public class JobCollector extends Collector {
         final String subsystem = "jenkins";
         String[] labelNameArray = {"job"};
         String[] labelStageNameArray = {"job", "stage"};
+        final boolean ignoreDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
 
         logger.debug("getting summary of build times in milliseconds by Job");
         summary = Summary.build().
@@ -127,6 +128,12 @@ public class JobCollector extends Collector {
             @Override
             public void invoke(Job job) {
                 logger.debug("Determining if we are already appending metrics for job [{}]", job.getName());
+
+                if (!job.isBuildable() && ignoreDisabledJobs) {
+                    logger.debug("job [{}] is disabled", job.getFullName());
+                    return;
+                }
+
                 for (Job old : jobs) {
                     if (old.getFullName().equals(job.getFullName())) {
                         // already added
@@ -181,6 +188,7 @@ public class JobCollector extends Collector {
 
     protected void appendJobMetrics(Job job) {
         String[] labelValueArray = {job.getFullName()};
+
         Run run = job.getLastBuild();
         // Never built
         if (null == run) {

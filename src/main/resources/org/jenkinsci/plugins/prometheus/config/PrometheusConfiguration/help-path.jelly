@@ -40,4 +40,9 @@
       Count the duration of aborted builds.
     </p>
   </div>
+  <div>
+    <p>
+      Ignore disabled jobs.
+    </p>
+  </div>
 </j:jelly>

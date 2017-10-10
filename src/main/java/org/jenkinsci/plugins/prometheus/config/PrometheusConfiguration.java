@@ -33,7 +33,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private boolean countFailedBuilds = true;
     private boolean countNotBuiltBuilds = true;
     private boolean countAbortedBuilds = true;
-    
+
+    private boolean processingDisabledBuilds = false;
 
     public PrometheusConfiguration() {
         load();
@@ -59,7 +60,9 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         countFailedBuilds = json.getBoolean("countFailedBuilds");
         countNotBuiltBuilds = json.getBoolean("countNotBuiltBuilds");
         countAbortedBuilds = json.getBoolean("countAbortedBuilds");
-        
+
+        processingDisabledBuilds = json.getBoolean("processingDisabledBuilds");
+
         save();
         return super.configure(req, json);
     }
@@ -128,6 +131,14 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     
     void setCountAbortedBuilds(boolean countAbortedBuilds) {
         this.countAbortedBuilds = countAbortedBuilds;
+    }
+
+    public boolean isProcessingDisabledBuilds() {
+        return processingDisabledBuilds;
+    }
+
+    void setProcessingDisabledBuilds(boolean processingDisabledBuilds) {
+        this.processingDisabledBuilds = processingDisabledBuilds;
     }
 
     public String getUrlName() {
