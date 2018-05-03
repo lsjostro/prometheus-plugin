@@ -2,3 +2,8 @@
 *.iml
 target
 work
+.gradle
+.project
+.classpath
+.settings/
+build/
