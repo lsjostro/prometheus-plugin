@@ -11,12 +11,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.TreeMap;
 
 /**
  * Helper methods for working with flow nodes
  */
 public class FlowNodes {
     private static final Logger LOG = Logger.getLogger(FlowNodes.class.getName());
+    private static FlowNode endNode;
 
     /**
      * Returns true if the given node is a stage node
@@ -26,42 +28,41 @@ public class FlowNodes {
     }
 
     /**
-     * Traverses through all the nodes invoking the given callback
+     * Recursively traverses through all nodes and serializes the stage nodes
      */
-    public static void forEach(FlowExecution execution, Callback<FlowNode> callback) {
-        if (execution != null) {
-            forEach(execution.getCurrentHeads(), callback);
-        }
-    }
-
-    /**
-     * Traverses through all the nodes invoking the given callback
-     */
-    public static void forEach(List<FlowNode> nodes, Callback<FlowNode> callback) {
+    public static List<FlowNode> traverseTree(List<FlowNode> nodes, TreeMap detector) {
+        final List<FlowNode> answer = new ArrayList<FlowNode>();
         if (nodes != null) {
             for (FlowNode node : nodes) {
-                callback.invoke(node);
-                forEach(node.getParents(), callback);
+                int id = Integer.parseInt(node.getId());
+                if (detector.get(id) != null) {
+                    // already added
+                    return answer;
+                }
+
+                detector.put(id, true);
+                if (isStageNode(node)) {
+                    answer.add(node);
+                }
+
+                answer.addAll(traverseTree(node.getParents(), detector));
             }
         }
+        return answer;
     }
 
     public static FlowNode getNextStageNode(FlowNode node) {
-        List<FlowNode> list = getSortedFlowNodes(node.getExecution());
+        List<FlowNode> list = getSortedStageNodes(node.getExecution());
         if (list.isEmpty()) {
             return null;
         }
         int idx = list.indexOf(node);
         if (idx >= 0) {
-            for (int i = idx + 1; i < list.size(); i++) {
-                FlowNode flowNode = list.get(i);
-                if (isStageNode(flowNode)) {
-                    return flowNode;
-                }
-            }
+            FlowNode flowNode = list.get(idx + 1);
+            return flowNode;
         }
         // lets return the last node
-        return list.get(list.size() - 1);
+        return endNode;
     }
 
     public static List<FlowNode> getSortedStageNodes(FlowExecution execution) {
@@ -69,45 +70,18 @@ public class FlowNodes {
     }
 
     public static List<FlowNode> getSortedStageNodes(final List<FlowNode> flowNodes) {
-        final List<FlowNode> answer = new ArrayList<FlowNode>();
-        forEach(flowNodes, new Callback<FlowNode>() {
-            @Override
-            public void invoke(FlowNode node) {
-                if (isStageNode(node)) {
-                    for (FlowNode old : answer) {
-                        if (Objects.equal(old.getId(), node.getId())) {
-                            // already added
-                            return;
-                        }
-                    }
-                    answer.add(node);
-                }
-            }
-        });
+        final List<FlowNode> answer = traverseTree(flowNodes, new TreeMap());
         sortInNodeIdOrder(answer);
+        getEndNode(flowNodes);
         return answer;
     }
 
-    public static List<FlowNode> getSortedFlowNodes(FlowExecution execution) {
-        return getSortedFlowNodes(execution.getCurrentHeads());
-    }
-
-    public static List<FlowNode> getSortedFlowNodes(final List<FlowNode> flowNodes) {
-        final List<FlowNode> answer = new ArrayList<FlowNode>();
-        forEach(flowNodes, new Callback<FlowNode>() {
-            @Override
-            public void invoke(FlowNode node) {
-                for (FlowNode old : answer) {
-                    if (Objects.equal(old.getId(), node.getId())) {
-                        // already added
-                        return;
-                    }
-                }
-                answer.add(node);
+    private static void getEndNode(final List<FlowNode> flowNodes) {
+        for (FlowNode node : flowNodes) {
+            if (endNode == null || Integer.parseInt(endNode.getId()) < Integer.parseInt(node.getId())) {
+                endNode = node;
             }
-        });
-        sortInNodeIdOrder(answer);
-        return answer;
+        }
     }
 
     public static void sortInNodeIdOrder(List<FlowNode> answer) {
