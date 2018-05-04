@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.prometheus.util.Callback;
+import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 import org.jenkinsci.plugins.prometheus.util.FlowNodes;
 import org.jenkinsci.plugins.prometheus.util.Jobs;
 import org.jenkinsci.plugins.prometheus.util.Runs;
@@ -27,7 +28,6 @@ import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 public class JobCollector extends Collector {
     private static final Logger logger = LoggerFactory.getLogger(JobCollector.class);
 
-    private String lastNamespace;
     private Summary summary;
     private Gauge jobBuildResultOrdinal;
     private Gauge jobBuildResult;
@@ -45,7 +45,7 @@ public class JobCollector extends Collector {
     public List<MetricFamilySamples> collect() {
         logger.debug("Collecting metrics for prometheus");
 
-        final String namespace = getNamespace();
+        final String namespace = ConfigurationUtils.getNamespace();
         final List<MetricFamilySamples> samples = new ArrayList<>();
         final List<Job> jobs = new ArrayList<>();
         final String fullname = "builds";
@@ -265,22 +265,4 @@ public class JobCollector extends Collector {
     private boolean hasTestResults(Run<?, ?> job) {
         return job.getAction(AbstractTestResultAction.class) != null;
     }
-
-    private String getNamespace() {
-        // get the namespace from the environment first
-        String namespace = System.getenv("PROMETHEUS_NAMESPACE");
-        if (StringUtils.isEmpty(namespace)) {
-            // when the environment variable isn't set, try the system configuration
-            namespace = PrometheusConfiguration.get().getDefaultNamespace();
-            if (!namespace.equals(lastNamespace)) {
-                logger.debug("Since the environment variable 'PROMETHEUS_NAMESPACE' is empty, using the value [{}] from the master configuration (empty strings are allowed)"+namespace);
-            }
-        }
-        if (!namespace.equals(lastNamespace)) {
-            logger.info("The prometheus namespace is now [{}]", namespace);
-        }
-        lastNamespace = namespace;
-        return namespace;
-    }
-
 }
