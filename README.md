@@ -20,6 +20,3 @@ duration of jobs and pipeline stages
 
 ## Author / Maintainer
 [Lars Sjöström](https://github.com/lsjostro)
-
-### Credits
-[fabric8io team](https://github.com/fabric8io). Open.source.ftw++!
