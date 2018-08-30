@@ -24,7 +24,7 @@ import io.prometheus.client.Summary;
 import io.prometheus.client.Gauge;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 
-public class JobCollector extends Collector {
+public class JobCollector extends Collector { 
     private static final Logger logger = LoggerFactory.getLogger(JobCollector.class);
 
     private String lastNamespace;
@@ -51,8 +51,9 @@ public class JobCollector extends Collector {
         final List<Job> jobs = new ArrayList<>();
         final String fullname = "builds";
         final String subsystem = "jenkins";
-        String[] labelNameArray = {"job"};
-        String[] labelStageNameArray = {"job", "stage"};
+        final String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
+        String[] labelNameArray = {jobAttribute};
+        String[] labelStageNameArray = {jobAttribute,"stage"};
         final boolean ignoreDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
         final boolean ignoreBuildMetrics =
             !PrometheusConfiguration.get().isCountAbortedBuilds() &&
@@ -195,7 +196,12 @@ public class JobCollector extends Collector {
     }
 
     protected void appendJobMetrics(Job job, Boolean ignoreBuildMetrics) {
-        String[] labelValueArray = {job.getFullName()};
+        // Add this to the repo as well so I can group by Github Repository 
+        String repoName = StringUtils.substringBetween(job.getFullName(), "/");
+        if (repoName == null) {
+            repoName="NA";
+        }
+        String[] labelValueArray = {job.getFullName(),};
 
         Run run = job.getLastBuild();
         // Never built
