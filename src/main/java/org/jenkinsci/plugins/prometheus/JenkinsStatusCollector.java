@@ -23,7 +23,11 @@ public class JenkinsStatusCollector extends Collector {
                 namespace(namespace).
                 help("Is Jenkins ready to receive requests").
                 create();
-        jenkinsUp.set(Jenkins.getInstance().getInitLevel() == hudson.init.InitMilestone.COMPLETED ?
+        Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins == null) {
+            return null;
+        }
+        jenkinsUp.set(jenkins.getInitLevel() == hudson.init.InitMilestone.COMPLETED ?
                 1 : 0);
         samples.addAll(jenkinsUp.collect());
         Gauge jenkinsUptime = Gauge.build().
@@ -33,7 +37,7 @@ public class JenkinsStatusCollector extends Collector {
                 namespace(namespace).
                 help("Time since Jenkins machine was initialized").
                 create();
-        Computer computer = Jenkins.getInstance().toComputer();
+        Computer computer = jenkins.toComputer();
         if (computer != null) {
             long upTime = computer.getConnectTime();
             jenkinsUptime.set(System.currentTimeMillis() - upTime);
