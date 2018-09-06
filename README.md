@@ -20,3 +20,7 @@ duration of jobs and pipeline stages
 
 ## Author / Maintainer
 [Lars Sjöström](https://github.com/lsjostro)
+
+[Marky Jackson](https://github.com/markyjackson-taulia)
+
+
