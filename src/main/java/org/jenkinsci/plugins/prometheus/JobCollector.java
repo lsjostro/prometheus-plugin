@@ -52,8 +52,8 @@ public class JobCollector extends Collector {
         final String fullname = "builds";
         final String subsystem = "jenkins";
         final String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
-        String[] labelNameArray = {jobAttribute};
-        String[] labelStageNameArray = {jobAttribute,"stage"};
+        String[] labelNameArray = {jobAttribute,"repo"};
+        String[] labelStageNameArray = {jobAttribute,"repo","stage"};
         final boolean ignoreDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
         final boolean ignoreBuildMetrics =
             !PrometheusConfiguration.get().isCountAbortedBuilds() &&
@@ -201,7 +201,7 @@ public class JobCollector extends Collector {
         if (repoName == null) {
             repoName="NA";
         }
-        String[] labelValueArray = {job.getFullName(),};
+        String[] labelValueArray = {job.getFullName(),repoName};
 
         Run run = job.getLastBuild();
         // Never built
@@ -278,9 +278,14 @@ public class JobCollector extends Collector {
     }
     private void observeStage(Job job, Run run, FlowNode stage) {
         logger.debug("Observing stage[{}] in run [{}] from job [{}]", stage.getDisplayName(), run.getNumber(), job.getName());
+        // Add this to the repo as well so I can group by Github Repository
+        String repoName = StringUtils.substringBetween(job.getFullName(), "/");
+        if (repoName == null) {
+            repoName="NA";
+        }
         String jobName = job.getFullName();
         String stageName = stage.getDisplayName();
-        String[] labelValueArray = {jobName, stageName};
+        String[] labelValueArray = {jobName,repoName, stageName};
 
         logger.debug("getting duration for stage[{}] in run [{}] from job [{}]", stage.getDisplayName(), run.getNumber(), job.getName());
         long duration = FlowNodes.getStageDuration(stage);
