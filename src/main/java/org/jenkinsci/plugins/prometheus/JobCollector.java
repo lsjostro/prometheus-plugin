@@ -62,6 +62,10 @@ public class JobCollector extends Collector {
             !PrometheusConfiguration.get().isCountSuccessfulBuilds() &&
             !PrometheusConfiguration.get().isCountUnstableBuilds();
 
+        if(ignoreBuildMetrics) {
+            return samples;
+        }
+        
         logger.debug("getting summary of build times in milliseconds by Job");
         summary = Summary.build().
                 name(fullname + "_duration_milliseconds_summary").
@@ -243,10 +247,6 @@ public class JobCollector extends Collector {
             jobTestsTotal.labels(labelValueArray).set(testsTotal);
             jobTestsSkipped.labels(labelValueArray).set(testsSkipped);
             jobTestsFailing.labels(labelValueArray).set(testsFail);
-        }
-
-        if(ignoreBuildMetrics) {
-            return;
         }
 
         while (run != null) {
