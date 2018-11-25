@@ -84,7 +84,7 @@ public class JobCollector extends Collector {
                 create();
         jobFailedCount = Counter.build().
                 name(fullname + "_failed_build_count").
-                subsystem(subsystem).name(namespace).
+                subsystem(subsystem).namespace(namespace).
                 labelNames(labelNameArray).
                 help("Failed build count").
                 create();
