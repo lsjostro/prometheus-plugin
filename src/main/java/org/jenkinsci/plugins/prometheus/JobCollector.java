@@ -175,7 +175,10 @@ public class JobCollector extends Collector {
             logger.debug("Adding [{}] samples from summary", jobDuration.collect().get(0).samples.size());
             samples.addAll(jobDuration.collect());
         }
-
+        if (jobStartMillis.collect().get(0).samples.size() > 0) {
+            logger.debug("Adding [{}] samples from summary", jobStartMillis.collect().get(0).samples.size());
+            samples.addAll(jobStartMillis.collect());
+        }
         if (jobTestsTotal.collect().get(0).samples.size() > 0){
             logger.debug("Adding [{}] samples from stage summary", jobTestsTotal.collect().get(0).samples.size());
             samples.addAll(jobTestsTotal.collect());
