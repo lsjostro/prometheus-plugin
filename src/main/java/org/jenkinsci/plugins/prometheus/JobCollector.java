@@ -5,6 +5,7 @@ import static org.jenkinsci.plugins.prometheus.util.FlowNodes.getSortedStageNode
 import java.util.ArrayList;
 import java.util.List;
 
+import io.prometheus.client.Counter;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.prometheus.util.Callback;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
@@ -25,10 +26,12 @@ import io.prometheus.client.Summary;
 import io.prometheus.client.Gauge;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 
-public class JobCollector extends Collector { 
+public class JobCollector extends Collector {
     private static final Logger logger = LoggerFactory.getLogger(JobCollector.class);
 
     private Summary summary;
+    private Counter jobSuccessCount;
+    private Counter jobFailedCount;
     private Gauge jobBuildResultOrdinal;
     private Gauge jobBuildResult;
     private Gauge jobStartMillis;
@@ -52,20 +55,20 @@ public class JobCollector extends Collector {
         final String fullname = "builds";
         final String subsystem = "jenkins";
         final String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
-        String[] labelNameArray = {jobAttribute,"repo"};
-        String[] labelStageNameArray = {jobAttribute,"repo","stage"};
+        String[] labelNameArray = {jobAttribute, "repo"};
+        String[] labelStageNameArray = {jobAttribute, "repo", "stage"};
         final boolean ignoreDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
         final boolean ignoreBuildMetrics =
-            !PrometheusConfiguration.get().isCountAbortedBuilds() &&
-            !PrometheusConfiguration.get().isCountFailedBuilds() &&
-            !PrometheusConfiguration.get().isCountNotBuiltBuilds() &&
-            !PrometheusConfiguration.get().isCountSuccessfulBuilds() &&
-            !PrometheusConfiguration.get().isCountUnstableBuilds();
+                !PrometheusConfiguration.get().isCountAbortedBuilds() &&
+                        !PrometheusConfiguration.get().isCountFailedBuilds() &&
+                        !PrometheusConfiguration.get().isCountNotBuiltBuilds() &&
+                        !PrometheusConfiguration.get().isCountSuccessfulBuilds() &&
+                        !PrometheusConfiguration.get().isCountUnstableBuilds();
 
-        if(ignoreBuildMetrics) {
+        if (ignoreBuildMetrics) {
             return samples;
         }
-        
+
         logger.debug("getting summary of build times in milliseconds by Job");
         summary = Summary.build().
                 name(fullname + "_duration_milliseconds_summary").
@@ -73,7 +76,18 @@ public class JobCollector extends Collector {
                 labelNames(labelNameArray).
                 help("Summary of Jenkins build times in milliseconds by Job").
                 create();
-
+        jobSuccessCount = Counter.build().
+                name(fullname + "_success_build_count").
+                subsystem(subsystem).namespace(namespace).
+                labelNames(labelNameArray).
+                help("Successful build count").
+                create();
+        jobFailedCount = Counter.build().
+                name(fullname + "_failed_build_count").
+                subsystem(subsystem).namespace(namespace).
+                labelNames(labelNameArray).
+                help("Failed build count").
+                create();
         jobBuildResultOrdinal = Gauge.build().
                 name(fullname + "_last_build_result_ordinal").
                 subsystem(subsystem).namespace(namespace).
@@ -159,39 +173,50 @@ public class JobCollector extends Collector {
                 appendJobMetrics(job, ignoreBuildMetrics);
             }
         });
-        if (summary.collect().get(0).samples.size() > 0){
+        if (summary.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from summary", summary.collect().get(0).samples.size());
             samples.addAll(summary.collect());
         }
-        if (jobBuildResultOrdinal.collect().get(0).samples.size() > 0){
+        if (jobSuccessCount.collect().get(0).samples.size() > 0) {
+            logger.debug("Adding [{}] samples from counter", jobSuccessCount.collect().get(0).samples.size());
+            samples.addAll(jobSuccessCount.collect());
+        }
+        if (jobFailedCount.collect().get(0).samples.size() > 0) {
+            logger.debug("Adding [{}] samples from counter", jobFailedCount.collect().get(0).samples.size());
+            samples.addAll(jobFailedCount.collect());
+        }
+        if (jobBuildResultOrdinal.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from summary", jobBuildResultOrdinal.collect().get(0).samples.size());
             samples.addAll(jobBuildResultOrdinal.collect());
         }
-        if (jobBuildResult.collect().get(0).samples.size() > 0){
+        if (jobBuildResult.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from summary", jobBuildResult.collect().get(0).samples.size());
             samples.addAll(jobBuildResult.collect());
         }
-        if (jobDuration.collect().get(0).samples.size() > 0){
+        if (jobDuration.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from summary", jobDuration.collect().get(0).samples.size());
             samples.addAll(jobDuration.collect());
         }
-
-        if (jobTestsTotal.collect().get(0).samples.size() > 0){
+        if (jobStartMillis.collect().get(0).samples.size() > 0) {
+            logger.debug("Adding [{}] samples from summary", jobStartMillis.collect().get(0).samples.size());
+            samples.addAll(jobStartMillis.collect());
+        }
+        if (jobTestsTotal.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from stage summary", jobTestsTotal.collect().get(0).samples.size());
             samples.addAll(jobTestsTotal.collect());
         }
 
-        if (jobTestsSkipped.collect().get(0).samples.size() > 0){
+        if (jobTestsSkipped.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from stage summary", jobTestsSkipped.collect().get(0).samples.size());
             samples.addAll(jobTestsSkipped.collect());
         }
 
-        if (jobTestsFailing.collect().get(0).samples.size() > 0){
+        if (jobTestsFailing.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from stage summary", jobTestsFailing.collect().get(0).samples.size());
             samples.addAll(jobTestsFailing.collect());
         }
 
-        if (stageSummary.collect().get(0).samples.size() > 0){
+        if (stageSummary.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from stage summary", stageSummary.collect().get(0).samples.size());
             samples.addAll(stageSummary.collect());
         }
@@ -200,12 +225,12 @@ public class JobCollector extends Collector {
     }
 
     protected void appendJobMetrics(Job job, Boolean ignoreBuildMetrics) {
-        // Add this to the repo as well so I can group by Github Repository 
+        // Add this to the repo as well so I can group by Github Repository
         String repoName = StringUtils.substringBetween(job.getFullName(), "/");
         if (repoName == null) {
-            repoName="NA";
+            repoName = "NA";
         }
-        String[] labelValueArray = {job.getFullName(),repoName};
+        String[] labelValueArray = {job.getFullName(), repoName};
 
         Run run = job.getLastBuild();
         // Never built
@@ -216,7 +241,7 @@ public class JobCollector extends Collector {
 
         /*
          * _last_build_result _last_build_result_ordinal
-         * 
+         *
          * SUCCESS   0 true  - The build had no errors.
          * UNSTABLE  1 true  - The build had some errors but they were not fatal. For example, some tests failed.
          * FAILURE   2 false - The build had a fatal error.
@@ -239,7 +264,7 @@ public class JobCollector extends Collector {
         jobDuration.labels(labelValueArray).set(duration);
         jobScore.labels(labelValueArray).set(score);
 
-        if(PrometheusConfiguration.get().isFetchTestResults() && hasTestResults(run)) {
+        if (PrometheusConfiguration.get().isFetchTestResults() && hasTestResults(run)) {
             int testsTotal = run.getAction(AbstractTestResultAction.class).getTotalCount();
             int testsFail = run.getAction(AbstractTestResultAction.class).getFailCount();
             int testsSkipped = run.getAction(AbstractTestResultAction.class).getSkipCount();
@@ -256,7 +281,14 @@ public class JobCollector extends Collector {
                 long buildDuration = run.getDuration();
                 logger.debug("duration is [{}] for run [{}] from job [{}]", buildDuration, run.getNumber(), job.getName());
                 summary.labels(labelValueArray).observe(buildDuration);
-
+                Result result = run.getResult();
+                if (result != null) {
+                    if (result.ordinal == 0 || result.ordinal == 1) {
+                        jobSuccessCount.labels(labelValueArray).inc();
+                    } else if (result.ordinal > 1) {
+                        jobFailedCount.labels(labelValueArray).inc();
+                    }
+                }
                 if (run instanceof WorkflowRun) {
                     logger.debug("run [{}] from job [{}] is of type workflowRun", run.getNumber(), job.getName());
                     WorkflowRun workflowRun = (WorkflowRun) run;
@@ -270,22 +302,24 @@ public class JobCollector extends Collector {
                         for (FlowNode stage : stages) {
                             observeStage(job, run, stage);
                         }
-                    } catch (final NullPointerException e){}
+                    } catch (final NullPointerException e) {
+                    }
                 }
             }
             run = run.getPreviousBuild();
         }
     }
+
     private void observeStage(Job job, Run run, FlowNode stage) {
         logger.debug("Observing stage[{}] in run [{}] from job [{}]", stage.getDisplayName(), run.getNumber(), job.getName());
         // Add this to the repo as well so I can group by Github Repository
         String repoName = StringUtils.substringBetween(job.getFullName(), "/");
         if (repoName == null) {
-            repoName="NA";
+            repoName = "NA";
         }
         String jobName = job.getFullName();
         String stageName = stage.getDisplayName();
-        String[] labelValueArray = {jobName,repoName, stageName};
+        String[] labelValueArray = {jobName, repoName, stageName};
 
         logger.debug("getting duration for stage[{}] in run [{}] from job [{}]", stage.getDisplayName(), run.getNumber(), job.getName());
         long duration = FlowNodes.getStageDuration(stage);
