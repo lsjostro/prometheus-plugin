@@ -11,6 +11,7 @@ import io.prometheus.client.dropwizard.DropwizardExports;
 import jenkins.metrics.api.Metrics;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
+import org.jenkinsci.plugins.prometheus.JenkinsStatusCollector;
 import org.jenkinsci.plugins.prometheus.JobCollector;
 import org.jenkinsci.plugins.prometheus.MetricsRequest;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
@@ -20,6 +21,7 @@ import org.kohsuke.stapler.StaplerRequest;
 public class PrometheusAction implements UnprotectedRootAction {
     private CollectorRegistry collectorRegistry;
     private JobCollector jobCollector = new JobCollector();
+    private JenkinsStatusCollector jenkinsStatusCollector = new JenkinsStatusCollector();
 
     @Override
     public String getIconFileName() {
@@ -42,6 +44,7 @@ public class PrometheusAction implements UnprotectedRootAction {
             if (collectorRegistry == null) {
                 collectorRegistry = CollectorRegistry.defaultRegistry;
                 collectorRegistry.register(jobCollector);
+                collectorRegistry.register(jenkinsStatusCollector);
                 if (Metrics.metricRegistry() != null) {
                     collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
                 }
