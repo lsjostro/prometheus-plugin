@@ -1,5 +1,7 @@
 # Jenkins Prometheus Metrics Plugin
 
+[![Join the chat at https://gitter.im/jenkinsci/prometheus-plugin](https://badges.gitter.im/jenkinsci/prometheus-plugin.svg)](https://gitter.im/jenkinsci/prometheus-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## About
 Jenkins Prometheus Plugin expose an endpoint (default `/prometheus`) with metrics where a Prometheus Server can scrape.
 
