@@ -5,6 +5,10 @@
 ## About
 Jenkins Prometheus Plugin expose an endpoint (default `/prometheus`) with metrics where a Prometheus Server can scrape.
 
+Documentation can be found [here](https://plugins.jenkins.io/prometheus)
+
+Please note that the documentation is a WIP.
+
 ## Metrics exposed
 Currently only metrics from the [Metrics-plugin](https://github.com/jenkinsci/metrics-plugin) and summary of build
 duration of jobs and pipeline stages
