@@ -8,6 +8,7 @@ import hudson.security.Permission;
 import hudson.util.HttpResponses;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
+import io.prometheus.client.hotspot.DefaultExports;
 import jenkins.metrics.api.Metrics;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
@@ -48,6 +49,7 @@ public class PrometheusAction implements UnprotectedRootAction {
                 if (Metrics.metricRegistry() != null) {
                     collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
                 }
+                DefaultExports.initialize();
             }
             return MetricsRequest.prometheusResponse(collectorRegistry);
         }
