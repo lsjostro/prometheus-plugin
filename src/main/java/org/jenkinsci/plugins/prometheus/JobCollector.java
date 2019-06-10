@@ -7,7 +7,6 @@ import java.util.List;
 
 import io.prometheus.client.Counter;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.prometheus.util.Callback;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 import org.jenkinsci.plugins.prometheus.util.FlowNodes;
 import org.jenkinsci.plugins.prometheus.util.Jobs;
@@ -151,27 +150,24 @@ public class JobCollector extends Collector {
                 help("Summary of Jenkins build times by Job and Stage").
                 create();
 
-        Jobs.forEachJob(new Callback<Job>() {
-            @Override
-            public void invoke(Job job) {
-                logger.debug("Determining if we are already appending metrics for job [{}]", job.getName());
+        Jobs.forEachJob(job -> {
+            logger.debug("Determining if we are already appending metrics for job [{}]", job.getName());
 
-                if (!job.isBuildable() && ignoreDisabledJobs) {
-                    logger.debug("job [{}] is disabled", job.getFullName());
+            if (!job.isBuildable() && ignoreDisabledJobs) {
+                logger.debug("job [{}] is disabled", job.getFullName());
+                return;
+            }
+
+            for (Job old : jobs) {
+                if (old.getFullName().equals(job.getFullName())) {
+                    // already added
+                    logger.debug("Job [{}] is already added", job.getName());
                     return;
                 }
-
-                for (Job old : jobs) {
-                    if (old.getFullName().equals(job.getFullName())) {
-                        // already added
-                        logger.debug("Job [{}] is already added", job.getName());
-                        return;
-                    }
-                }
-                logger.debug("Job [{}] is not already added. Appending its metrics", job.getName());
-                jobs.add(job);
-                appendJobMetrics(job, ignoreBuildMetrics);
             }
+            logger.debug("Job [{}] is not already added. Appending its metrics", job.getName());
+            jobs.add(job);
+            appendJobMetrics(job, ignoreBuildMetrics);
         });
         if (summary.collect().get(0).samples.size() > 0) {
             logger.debug("Adding [{}] samples from summary", summary.collect().get(0).samples.size());
