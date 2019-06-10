@@ -127,14 +127,14 @@ public class JobCollector extends Collector {
                 name(fullname + "_last_build_tests_total").
                 subsystem(subsystem).namespace(namespace).
                 labelNames(labelNameArray).
-                help("Number of tests running during the last build").
+                help("Number of total tests during the last build").
                 create();
 
         jobTestsSkipped = Gauge.build().
                 name(fullname + "_last_build_tests_skipped").
                 subsystem(subsystem).namespace(namespace).
                 labelNames(labelNameArray).
-                help("Number of skiping tests during the last build").
+                help("Number of skipped tests during the last build").
                 create();
 
         jobTestsFailing = Gauge.build().
