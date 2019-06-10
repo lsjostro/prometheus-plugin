@@ -11,7 +11,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 public class MetricsRequest {
-    public static HttpResponse prometheusResponse(final CollectorRegistry collectorRegistry) {
+
+    public static HttpResponse prometheusResponse(CollectorRegistry collectorRegistry) {
         return new HttpResponse() {
             @Override
             public void generateResponse(StaplerRequest request, StaplerResponse response, Object node) throws IOException, ServletException {

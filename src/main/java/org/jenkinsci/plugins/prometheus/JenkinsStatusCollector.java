@@ -13,9 +13,9 @@ public class JenkinsStatusCollector extends Collector {
 
     @Override
     public List<MetricFamilySamples> collect() {
-        final String subsystem = "jenkins";
-        final String namespace = ConfigurationUtils.getNamespace();
-        final List<MetricFamilySamples> samples = new ArrayList<>();
+        String subsystem = "jenkins";
+        String namespace = ConfigurationUtils.getNamespace();
+        List<MetricFamilySamples> samples = new ArrayList<>();
         Gauge jenkinsUp = Gauge.build().
                 name("up").
                 labelNames().

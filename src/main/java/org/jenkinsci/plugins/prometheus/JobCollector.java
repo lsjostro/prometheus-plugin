@@ -49,16 +49,16 @@ public class JobCollector extends Collector {
     public List<MetricFamilySamples> collect() {
         logger.debug("Collecting metrics for prometheus");
 
-        final String namespace = ConfigurationUtils.getNamespace();
-        final List<MetricFamilySamples> samples = new ArrayList<>();
-        final List<Job> jobs = new ArrayList<>();
-        final String fullname = "builds";
-        final String subsystem = "jenkins";
-        final String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
+        String namespace = ConfigurationUtils.getNamespace();
+        List<MetricFamilySamples> samples = new ArrayList<>();
+        List<Job> jobs = new ArrayList<>();
+        String fullname = "builds";
+        String subsystem = "jenkins";
+        String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
         String[] labelNameArray = {jobAttribute, "repo"};
         String[] labelStageNameArray = {jobAttribute, "repo", "stage"};
-        final boolean ignoreDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
-        final boolean ignoreBuildMetrics =
+        boolean ignoreDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
+        boolean ignoreBuildMetrics =
                 !PrometheusConfiguration.get().isCountAbortedBuilds() &&
                         !PrometheusConfiguration.get().isCountFailedBuilds() &&
                         !PrometheusConfiguration.get().isCountNotBuiltBuilds() &&
@@ -302,7 +302,7 @@ public class JobCollector extends Collector {
                         for (FlowNode stage : stages) {
                             observeStage(job, run, stage);
                         }
-                    } catch (final NullPointerException e) {
+                    } catch (NullPointerException e) {
                     }
                 }
             }

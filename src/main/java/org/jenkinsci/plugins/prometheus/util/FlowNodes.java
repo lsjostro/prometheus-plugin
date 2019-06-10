@@ -32,7 +32,7 @@ public class FlowNodes {
      * Recursively traverses through all nodes and serializes the stage nodes
      */
     public static List<FlowNode> traverseTree(List<FlowNode> nodes, TreeMap<Integer, Boolean> detector) {
-        final List<FlowNode> answer = new ArrayList<>();
+        List<FlowNode> answer = new ArrayList<>();
         if (nodes != null) {
             for (FlowNode node : nodes) {
                 int id = Integer.parseInt(node.getId());
@@ -69,14 +69,14 @@ public class FlowNodes {
         return getSortedStageNodes(execution.getCurrentHeads());
     }
 
-    public static List<FlowNode> getSortedStageNodes(final List<FlowNode> flowNodes) {
-        final List<FlowNode> answer = traverseTree(flowNodes, new TreeMap<>());
+    public static List<FlowNode> getSortedStageNodes(List<FlowNode> flowNodes) {
+        List<FlowNode> answer = traverseTree(flowNodes, new TreeMap<>());
         sortInNodeIdOrder(answer);
         getEndNode(flowNodes);
         return answer;
     }
 
-    private static void getEndNode(final List<FlowNode> flowNodes) {
+    private static void getEndNode(List<FlowNode> flowNodes) {
         for (FlowNode node : flowNodes) {
             if (endNode == null || Integer.parseInt(endNode.getId()) < Integer.parseInt(node.getId())) {
                 endNode = node;
