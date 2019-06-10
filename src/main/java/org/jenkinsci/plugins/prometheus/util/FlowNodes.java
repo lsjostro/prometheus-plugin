@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.prometheus.util;
 
-import com.google.common.base.Objects;
 import org.jenkinsci.plugins.workflow.actions.LabelAction;
 import org.jenkinsci.plugins.workflow.actions.ThreadNameAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
@@ -87,14 +85,7 @@ public class FlowNodes {
     }
 
     public static void sortInNodeIdOrder(List<FlowNode> answer) {
-        // lets sort by node id
-        Comparator<? super FlowNode> comparator = new Comparator<FlowNode>() {
-            @Override
-            public int compare(FlowNode o1, FlowNode o2) {
-                return getNodeIdNumber(o1) - getNodeIdNumber(o2);
-            }
-        };
-        Collections.sort(answer, comparator);
+        answer.sort(Comparator.comparingInt(FlowNodes::getNodeIdNumber));
     }
 
     public static int getNodeIdNumber(FlowNode node) {
@@ -122,5 +113,4 @@ public class FlowNodes {
         }
         return 0;
     }
-
 }
