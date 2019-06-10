@@ -273,6 +273,7 @@ public class JobCollector extends Collector {
                             observeStage(job, run, stage);
                         }
                     } catch (NullPointerException e) {
+                        // ignored
                     }
                 }
             }
