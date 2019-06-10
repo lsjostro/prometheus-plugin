@@ -78,11 +78,13 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         urlName = path.split("/")[0];
         List<String> pathParts = Arrays.asList(path.split("/"));
         additionalPath = (pathParts.size() > 1 ? "/" : "") + StringUtils.join(pathParts.subList(1, pathParts.size()), "/");
+        save();
     }
     public String getJobAttributeName() { return jobAttributeName; }
 
     public void setJobAttributeName(String jobAttributeName) {
         this.jobAttributeName = jobAttributeName;
+        save();
     }
 
     public String getDefaultNamespace() {
@@ -90,55 +92,62 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     }
 
     public void setDefaultNamespace(String path) {
-    	defaultNamespace = path;
+        this.defaultNamespace = path;
+        save();
     }
 
     public boolean isUseAuthenticatedEndpoint() {
         return useAuthenticatedEndpoint;
     }
 
-    void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
+    public void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
+        save();
     }
     
     public boolean isCountSuccessfulBuilds() {
         return countSuccessfulBuilds;
     }
-    
-    void setCountSuccessfulBuilds(boolean countSuccessfulBuilds) {
+
+    public void setCountSuccessfulBuilds(boolean countSuccessfulBuilds) {
         this.countSuccessfulBuilds = countSuccessfulBuilds;
+        save();
     }
 
     public boolean isCountUnstableBuilds() {
         return countUnstableBuilds;
     }
-    
-    void setCountUnstableBuilds(boolean countUnstableBuilds) {
+
+    public void setCountUnstableBuilds(boolean countUnstableBuilds) {
         this.countUnstableBuilds = countUnstableBuilds;
+        save();
     }
 
     public boolean isCountFailedBuilds() {
         return countFailedBuilds;
     }
-    
-    void setCountFailedBuilds(boolean countFailedBuilds) {
+
+    public void setCountFailedBuilds(boolean countFailedBuilds) {
         this.countFailedBuilds = countFailedBuilds;
+        save();
     }
 
     public boolean isCountNotBuiltBuilds() {
         return countNotBuiltBuilds;
     }
-    
-    void setCountNotBuiltBuilds(boolean countNotBuiltBuilds) {
+
+    public void setCountNotBuiltBuilds(boolean countNotBuiltBuilds) {
         this.countNotBuiltBuilds = countNotBuiltBuilds;
+        save();
     }
 
     public boolean isCountAbortedBuilds() {
         return countAbortedBuilds;
     }
-    
-    void setCountAbortedBuilds(boolean countAbortedBuilds) {
+
+    public void setCountAbortedBuilds(boolean countAbortedBuilds) {
         this.countAbortedBuilds = countAbortedBuilds;
+        save();
     }
 
     public boolean isFetchTestResults() {
@@ -147,14 +156,16 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setFetchTestResults(boolean fetchTestResults) {
         this.fetchTestResults = fetchTestResults;
+        save();
     }
 
     public boolean isProcessingDisabledBuilds() {
         return processingDisabledBuilds;
     }
 
-    void setProcessingDisabledBuilds(boolean processingDisabledBuilds) {
+    public void setProcessingDisabledBuilds(boolean processingDisabledBuilds) {
         this.processingDisabledBuilds = processingDisabledBuilds;
+        save();
     }
 
     public String getUrlName() {

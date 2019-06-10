@@ -17,7 +17,7 @@
   <inceptionYear>2016</inceptionYear>
 
   <properties>
-    <prometheus.version>0.0.26</prometheus.version>
+    <prometheus.version>0.6.0</prometheus.version>
     <workflow.api.version>1.8</workflow.api.version>
   </properties>
 
@@ -47,7 +47,7 @@
     <connection>scm:git:ssh://github.com/jenkinsci/prometheus-plugin.git</connection>
     <developerConnection>scm:git:ssh://github.com/jenkinsci/prometheus-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/prometheus-plugin/</url>
-    <tag>${project.version}</tag>
+    <tag>prometheus-2.0.4</tag>
   </scm>
 
   <repositories>
@@ -94,6 +94,11 @@
       <version>2.3.1</version>
     </dependency>
 
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_hotspot</artifactId>
+      <version>${prometheus.version}</version>
+    </dependency>
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>simpleclient</artifactId>

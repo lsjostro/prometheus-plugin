@@ -1,7 +1,8 @@
 package org.jenkinsci.plugins.prometheus.util;
 
 import com.google.common.base.Objects;
-import org.jenkinsci.plugins.workflow.actions.StageAction;
+import org.jenkinsci.plugins.workflow.actions.LabelAction;
+import org.jenkinsci.plugins.workflow.actions.ThreadNameAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -24,7 +25,7 @@ public class FlowNodes {
      * Returns true if the given node is a stage node
      */
     public static boolean isStageNode(FlowNode node) {
-        return node != null && node.getAction(StageAction.class) != null;
+        return node != null && (node.getAction(LabelAction.class) != null && node.getAction(ThreadNameAction.class) == null);
     }
 
     /**
