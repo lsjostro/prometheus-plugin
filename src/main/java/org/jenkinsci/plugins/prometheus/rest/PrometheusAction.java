@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.prometheus.rest;
 
 import hudson.Extension;
-import hudson.model.RootAction;
 import hudson.model.UnprotectedRootAction;
-import hudson.security.Messages;
 import hudson.security.Permission;
 import hudson.util.HttpResponses;
 import io.prometheus.client.CollectorRegistry;
@@ -11,7 +9,6 @@ import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.hotspot.DefaultExports;
 import jenkins.metrics.api.Metrics;
 import jenkins.model.Jenkins;
-import org.acegisecurity.Authentication;
 import org.jenkinsci.plugins.prometheus.JenkinsStatusCollector;
 import org.jenkinsci.plugins.prometheus.JobCollector;
 import org.jenkinsci.plugins.prometheus.MetricsRequest;
@@ -20,6 +17,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 @Extension
 public class PrometheusAction implements UnprotectedRootAction {
+
     private CollectorRegistry collectorRegistry;
     private JobCollector jobCollector = new JobCollector();
     private JenkinsStatusCollector jenkinsStatusCollector = new JenkinsStatusCollector();
@@ -46,9 +44,7 @@ public class PrometheusAction implements UnprotectedRootAction {
                 collectorRegistry = CollectorRegistry.defaultRegistry;
                 collectorRegistry.register(jobCollector);
                 collectorRegistry.register(jenkinsStatusCollector);
-                if (Metrics.metricRegistry() != null) {
-                    collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
-                }
+                collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
                 DefaultExports.initialize();
             }
             return MetricsRequest.prometheusResponse(collectorRegistry);
@@ -58,11 +54,8 @@ public class PrometheusAction implements UnprotectedRootAction {
 
     private void checkPermission(Permission permission) {
         if (PrometheusConfiguration.get().isUseAuthenticatedEndpoint()) {
-            Authentication authentication = Jenkins.getAuthentication();
-            if (!Jenkins.getActiveInstance().getACL().hasPermission(authentication, permission)) {
-                String message = Messages.AccessDeniedException2_MissingPermission(authentication.getName(),
-                                                                                   permission.group.title + "/" + permission.name);
-                throw HttpResponses.errorWithoutStack(403, message);
+            if (!Jenkins.getInstance().hasPermission(permission)) {
+                throw HttpResponses.forbidden();
             }
         }
     }

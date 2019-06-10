@@ -45,20 +45,17 @@ public class Runs {
 
     public static Map<String, Object> getBuildParameters(Run build) {
         List<ParametersAction> actions = build.getActions(ParametersAction.class);
-        if (actions != null) {
-            Map<String, Object> answer = new HashMap<String, Object>();
-            for (ParametersAction action : actions) {
-                List<ParameterValue> parameters = action.getParameters();
-                if (parameters != null) {
-                    for (ParameterValue parameter : parameters) {
-                        String name = parameter.getName();
-                        Object value = parameter.getValue();
-                        answer.put(name, value);
-                    }
+        Map<String, Object> answer = new HashMap<String, Object>();
+        for (ParametersAction action : actions) {
+            List<ParameterValue> parameters = action.getParameters();
+            if (parameters != null) {
+                for (ParameterValue parameter : parameters) {
+                    String name = parameter.getName();
+                    Object value = parameter.getValue();
+                    answer.put(name, value);
                 }
             }
-            return answer;
         }
-        return null;
+        return answer;
     }
 }
