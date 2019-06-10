@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.prometheus.util;
 
-import org.jenkinsci.plugins.workflow.actions.StageAction;
+import org.jenkinsci.plugins.workflow.actions.LabelAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ public class FlowNodesTest {
         nodeList.add(topNode);
         when(topNode.getId()).thenReturn("999");
         when(topNode.getParents()).thenReturn(nodeList);
-        when(topNode.getAction(StageAction.class)).thenReturn(mock(StageAction.class));
+        when(topNode.getAction(LabelAction.class)).thenReturn(mock(LabelAction.class));
         List<FlowNode> sortedNodes = getSortedStageNodes(nodeList);
         assertEquals(1, sortedNodes.size());
     }
