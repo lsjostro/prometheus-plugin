@@ -26,6 +26,7 @@ import io.prometheus.client.Gauge;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 
 public class JobCollector extends Collector {
+
     private static final Logger logger = LoggerFactory.getLogger(JobCollector.class);
 
     private Summary summary;
@@ -169,55 +170,28 @@ public class JobCollector extends Collector {
             jobs.add(job);
             appendJobMetrics(job, ignoreBuildMetrics);
         });
-        if (summary.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from summary", summary.collect().get(0).samples.size());
-            samples.addAll(summary.collect());
-        }
-        if (jobSuccessCount.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from counter", jobSuccessCount.collect().get(0).samples.size());
-            samples.addAll(jobSuccessCount.collect());
-        }
-        if (jobFailedCount.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from counter", jobFailedCount.collect().get(0).samples.size());
-            samples.addAll(jobFailedCount.collect());
-        }
-        if (jobBuildResultOrdinal.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from summary", jobBuildResultOrdinal.collect().get(0).samples.size());
-            samples.addAll(jobBuildResultOrdinal.collect());
-        }
-        if (jobBuildResult.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from summary", jobBuildResult.collect().get(0).samples.size());
-            samples.addAll(jobBuildResult.collect());
-        }
-        if (jobDuration.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from summary", jobDuration.collect().get(0).samples.size());
-            samples.addAll(jobDuration.collect());
-        }
-        if (jobStartMillis.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from summary", jobStartMillis.collect().get(0).samples.size());
-            samples.addAll(jobStartMillis.collect());
-        }
-        if (jobTestsTotal.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from stage summary", jobTestsTotal.collect().get(0).samples.size());
-            samples.addAll(jobTestsTotal.collect());
-        }
 
-        if (jobTestsSkipped.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from stage summary", jobTestsSkipped.collect().get(0).samples.size());
-            samples.addAll(jobTestsSkipped.collect());
-        }
-
-        if (jobTestsFailing.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from stage summary", jobTestsFailing.collect().get(0).samples.size());
-            samples.addAll(jobTestsFailing.collect());
-        }
-
-        if (stageSummary.collect().get(0).samples.size() > 0) {
-            logger.debug("Adding [{}] samples from stage summary", stageSummary.collect().get(0).samples.size());
-            samples.addAll(stageSummary.collect());
-        }
+        addSamples(samples, summary.collect(), "Adding [{}] samples from summary");
+        addSamples(samples, jobSuccessCount.collect(), "Adding [{}] samples from counter");
+        addSamples(samples, jobFailedCount.collect(), "Adding [{}] samples from counter");
+        addSamples(samples, jobBuildResultOrdinal.collect(), "Adding [{}] samples from gauge");
+        addSamples(samples, jobBuildResult.collect(), "Adding [{}] samples from gauge");
+        addSamples(samples, jobDuration.collect(), "Adding [{}] samples from gauge");
+        addSamples(samples, jobStartMillis.collect(), "Adding [{}] samples from gauge");
+        addSamples(samples, jobTestsTotal.collect(), "Adding [{}] samples from gauge");
+        addSamples(samples, jobTestsSkipped.collect(), "Adding [{}] samples from gauge");
+        addSamples(samples, jobTestsFailing.collect(), "Adding [{}] samples from gauge");
+        addSamples(samples, stageSummary.collect(), "Adding [{}] samples from summary");
 
         return samples;
+    }
+
+    private void addSamples(List<MetricFamilySamples> allSamples, List<MetricFamilySamples> newSamples, String logMessage) {
+        int sampleCount = newSamples.get(0).samples.size();
+        if (sampleCount > 0) {
+            logger.debug(logMessage, sampleCount);
+            allSamples.addAll(newSamples);
+        }
     }
 
     protected void appendJobMetrics(Job job, Boolean ignoreBuildMetrics) {
