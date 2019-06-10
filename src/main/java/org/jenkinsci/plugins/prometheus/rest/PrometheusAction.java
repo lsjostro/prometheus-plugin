@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.prometheus.rest;
 
 import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
-import hudson.security.Permission;
 import hudson.util.HttpResponses;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
@@ -39,7 +38,7 @@ public class PrometheusAction implements UnprotectedRootAction {
 
     public Object doDynamic(StaplerRequest request) {
         if (request.getRestOfPath().equals(PrometheusConfiguration.get().getAdditionalPath())) {
-            checkPermission(Metrics.VIEW);
+            checkPermission();
             if (collectorRegistry == null) {
                 collectorRegistry = CollectorRegistry.defaultRegistry;
                 collectorRegistry.register(jobCollector);
@@ -52,9 +51,9 @@ public class PrometheusAction implements UnprotectedRootAction {
         throw HttpResponses.notFound();
     }
 
-    private void checkPermission(Permission permission) {
+    private void checkPermission() {
         if (PrometheusConfiguration.get().isUseAuthenticatedEndpoint()) {
-            if (!Jenkins.getInstance().hasPermission(permission)) {
+            if (!Jenkins.getInstance().hasPermission(Metrics.VIEW)) {
                 throw HttpResponses.forbidden();
             }
         }
