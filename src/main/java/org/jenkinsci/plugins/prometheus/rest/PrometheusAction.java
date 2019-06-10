@@ -18,8 +18,6 @@ import org.kohsuke.stapler.StaplerRequest;
 public class PrometheusAction implements UnprotectedRootAction {
 
     private CollectorRegistry collectorRegistry;
-    private JobCollector jobCollector = new JobCollector();
-    private JenkinsStatusCollector jenkinsStatusCollector = new JenkinsStatusCollector();
 
     @Override
     public String getIconFileName() {
@@ -41,8 +39,8 @@ public class PrometheusAction implements UnprotectedRootAction {
             checkPermission();
             if (collectorRegistry == null) {
                 collectorRegistry = CollectorRegistry.defaultRegistry;
-                collectorRegistry.register(jobCollector);
-                collectorRegistry.register(jenkinsStatusCollector);
+                collectorRegistry.register(new JobCollector());
+                collectorRegistry.register(new JenkinsStatusCollector());
                 collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
                 DefaultExports.initialize();
             }
