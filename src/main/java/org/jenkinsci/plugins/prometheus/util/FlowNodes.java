@@ -6,19 +6,21 @@ import org.jenkinsci.plugins.workflow.actions.ThreadNameAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.TreeMap;
 
 /**
  * Helper methods for working with flow nodes
  */
 public class FlowNodes {
-    private static final Logger LOG = Logger.getLogger(FlowNodes.class.getName());
+
+    private static final Logger logger = LoggerFactory.getLogger(FlowNodes.class);
     private static FlowNode endNode;
 
     /**
@@ -101,7 +103,7 @@ public class FlowNodes {
             try {
                 return Integer.parseInt(id);
             } catch (NumberFormatException e) {
-                LOG.warning("Failed to parse FlowNode id " + id + ". " + e);
+                logger.warn("Failed to parse FlowNode id [{}].", id);
             }
         }
         return 0;
