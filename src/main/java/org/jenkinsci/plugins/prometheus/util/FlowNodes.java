@@ -32,7 +32,7 @@ public class FlowNodes {
      * Recursively traverses through all nodes and serializes the stage nodes
      */
     public static List<FlowNode> traverseTree(List<FlowNode> nodes, TreeMap detector) {
-        final List<FlowNode> answer = new ArrayList<FlowNode>();
+        final List<FlowNode> answer = new ArrayList<>();
         if (nodes != null) {
             for (FlowNode node : nodes) {
                 int id = Integer.parseInt(node.getId());

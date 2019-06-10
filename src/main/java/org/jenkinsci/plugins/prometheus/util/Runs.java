@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Runs {
+
     public static boolean includeBuildInMetrics(Run build) {
         boolean include = false;
         if (!build.isBuilding()) {
@@ -45,7 +46,7 @@ public class Runs {
 
     public static Map<String, Object> getBuildParameters(Run build) {
         List<ParametersAction> actions = build.getActions(ParametersAction.class);
-        Map<String, Object> answer = new HashMap<String, Object>();
+        Map<String, Object> answer = new HashMap<>();
         for (ParametersAction action : actions) {
             List<ParameterValue> parameters = action.getParameters();
             if (parameters != null) {
