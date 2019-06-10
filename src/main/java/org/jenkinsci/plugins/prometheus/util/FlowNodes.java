@@ -31,7 +31,7 @@ public class FlowNodes {
     /**
      * Recursively traverses through all nodes and serializes the stage nodes
      */
-    public static List<FlowNode> traverseTree(List<FlowNode> nodes, TreeMap detector) {
+    public static List<FlowNode> traverseTree(List<FlowNode> nodes, TreeMap<Integer, Boolean> detector) {
         final List<FlowNode> answer = new ArrayList<>();
         if (nodes != null) {
             for (FlowNode node : nodes) {
@@ -70,7 +70,7 @@ public class FlowNodes {
     }
 
     public static List<FlowNode> getSortedStageNodes(final List<FlowNode> flowNodes) {
-        final List<FlowNode> answer = traverseTree(flowNodes, new TreeMap());
+        final List<FlowNode> answer = traverseTree(flowNodes, new TreeMap<>());
         sortInNodeIdOrder(answer);
         getEndNode(flowNodes);
         return answer;
