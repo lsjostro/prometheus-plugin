@@ -70,44 +70,48 @@ public class JobCollector extends Collector {
         }
 
         logger.debug("getting summary of build times in milliseconds by Job");
-        summary = Summary.build().
-                name(fullname + "_duration_milliseconds_summary").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Summary of Jenkins build times in milliseconds by Job").
-                create();
-        jobSuccessCount = Counter.build().
-                name(fullname + "_success_build_count").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Successful build count").
-                create();
-        jobFailedCount = Counter.build().
-                name(fullname + "_failed_build_count").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Failed build count").
-                create();
-        jobBuildResultOrdinal = Gauge.build().
-                name(fullname + "_last_build_result_ordinal").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Build status of a job.").
-                create();
 
-        jobBuildResult = Gauge.build().
-                name(fullname + "_last_build_result").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Build status of a job as a boolean (0 or 1)").
-                create();
+        summary = Summary.build()
+                .name(fullname + "_duration_milliseconds_summary")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Summary of Jenkins build times in milliseconds by Job")
+                .create();
 
-        jobDuration = Gauge.build().
-                name(fullname + "_last_build_duration_milliseconds").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Build times in milliseconds of last build").
-                create();
+        jobSuccessCount = Counter.build()
+                .name(fullname + "_success_build_count")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Successful build count")
+                .create();
+
+        jobFailedCount = Counter.build()
+                .name(fullname + "_failed_build_count")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Failed build count")
+                .create();
+
+        jobBuildResultOrdinal = Gauge.build()
+                .name(fullname + "_last_build_result_ordinal")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Build status of a job.")
+                .create();
+
+        jobBuildResult = Gauge.build()
+                .name(fullname + "_last_build_result")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Build status of a job as a boolean (0 or 1)")
+                .create();
+
+        jobDuration = Gauge.build()
+                .name(fullname + "_last_build_duration_milliseconds")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Build times in milliseconds of last build")
+                .create();
 
         jobStartMillis = Gauge.build()
                 .name(fullname + "_last_build_start_time_milliseconds")
@@ -116,40 +120,41 @@ public class JobCollector extends Collector {
                 .help("Last build start timestamp in milliseconds")
                 .create();
 
-        jobScore = Gauge.build().
-                name(fullname + "_last_build_score").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Build score of last build").
-                create();
+        jobScore = Gauge.build()
+                .name(fullname + "_last_build_score")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Build score of last build")
+                .create();
 
-        jobTestsTotal = Gauge.build().
-                name(fullname + "_last_build_tests_total").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Number of total tests during the last build").
-                create();
+        jobTestsTotal = Gauge.build()
+                .name(fullname + "_last_build_tests_total")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Number of total tests during the last build")
+                .create();
 
-        jobTestsSkipped = Gauge.build().
-                name(fullname + "_last_build_tests_skipped").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Number of skipped tests during the last build").
-                create();
+        jobTestsSkipped = Gauge.build()
+                .name(fullname + "_last_build_tests_skipped")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Number of skipped tests during the last build")
+                .create();
 
-        jobTestsFailing = Gauge.build().
-                name(fullname + "_last_build_tests_failing").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelNameArray).
-                help("Number of failing tests during the last build").
-                create();
+        jobTestsFailing = Gauge.build()
+                .name(fullname + "_last_build_tests_failing")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelNameArray)
+                .help("Number of failing tests during the last build")
+                .create();
 
         logger.debug("getting summary of build times by Job and Stage");
-        stageSummary = Summary.build().name(fullname + "_stage_duration_milliseconds_summary").
-                subsystem(subsystem).namespace(namespace).
-                labelNames(labelStageNameArray).
-                help("Summary of Jenkins build times by Job and Stage").
-                create();
+
+        stageSummary = Summary.build().name(fullname + "_stage_duration_milliseconds_summary")
+                .subsystem(subsystem).namespace(namespace)
+                .labelNames(labelStageNameArray)
+                .help("Summary of Jenkins build times by Job and Stage")
+                .create();
 
         Jobs.forEachJob(job -> {
             logger.debug("Determining if we are already appending metrics for job [{}]", job.getName());
