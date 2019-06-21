@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>2.11</version>
+    <version>3.43</version>
     <relativePath />
   </parent>
 
@@ -17,6 +17,8 @@
   <inceptionYear>2016</inceptionYear>
 
   <properties>
+    <java.level>8</java.level>
+    <jenkins.version>2.60.3</jenkins.version>
     <prometheus.version>0.6.0</prometheus.version>
     <workflow.api.version>1.8</workflow.api.version>
   </properties>
