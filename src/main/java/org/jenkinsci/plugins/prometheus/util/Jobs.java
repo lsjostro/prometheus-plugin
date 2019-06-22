@@ -6,9 +6,10 @@ import jenkins.model.Jenkins;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Jobs {
-    public static void forEachJob(Callback<Job> callback) {
+    public static void forEachJob(Consumer<Job> consumer) {
         List<Item> items = Jenkins.getInstance().getAllItems();
         if (items != null) {
             for (Item item : items) {
@@ -16,7 +17,7 @@ public class Jobs {
                 if (jobs != null) {
                     for (Job job : jobs) {
                         if (job != null) {
-                            callback.invoke(job);
+                            consumer.accept(job);
                         }
                     }
                 }
