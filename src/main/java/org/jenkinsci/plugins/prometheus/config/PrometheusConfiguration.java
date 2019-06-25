@@ -42,12 +42,12 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         load();
         if (urlName == null) {
             Map<String, String> env = System.getenv();
-            setPath(env.containsKey(PROMETHEUS_ENDPOINT) ? env.get(PROMETHEUS_ENDPOINT) : DEFAULT_ENDPOINT);
+            setPath(env.getOrDefault(PROMETHEUS_ENDPOINT, DEFAULT_ENDPOINT));
         }
     }
 
     public static PrometheusConfiguration get() {
-        Descriptor configuration = Jenkins.getActiveInstance().getDescriptor(PrometheusConfiguration.class);
+        Descriptor configuration = Jenkins.getInstance().getDescriptor(PrometheusConfiguration.class);
         return (PrometheusConfiguration) configuration;
     }
 

@@ -1,24 +1,24 @@
 package org.jenkinsci.plugins.prometheus.util;
 
-import com.google.common.base.Objects;
 import org.jenkinsci.plugins.workflow.actions.LabelAction;
 import org.jenkinsci.plugins.workflow.actions.ThreadNameAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.TreeMap;
 
 /**
  * Helper methods for working with flow nodes
  */
 public class FlowNodes {
-    private static final Logger LOG = Logger.getLogger(FlowNodes.class.getName());
+
+    private static final Logger logger = LoggerFactory.getLogger(FlowNodes.class);
     private static FlowNode endNode;
 
     /**
@@ -31,8 +31,8 @@ public class FlowNodes {
     /**
      * Recursively traverses through all nodes and serializes the stage nodes
      */
-    public static List<FlowNode> traverseTree(List<FlowNode> nodes, TreeMap detector) {
-        final List<FlowNode> answer = new ArrayList<FlowNode>();
+    public static List<FlowNode> traverseTree(List<FlowNode> nodes, TreeMap<Integer, Boolean> detector) {
+        List<FlowNode> answer = new ArrayList<>();
         if (nodes != null) {
             for (FlowNode node : nodes) {
                 int id = Integer.parseInt(node.getId());
@@ -69,14 +69,14 @@ public class FlowNodes {
         return getSortedStageNodes(execution.getCurrentHeads());
     }
 
-    public static List<FlowNode> getSortedStageNodes(final List<FlowNode> flowNodes) {
-        final List<FlowNode> answer = traverseTree(flowNodes, new TreeMap());
+    public static List<FlowNode> getSortedStageNodes(List<FlowNode> flowNodes) {
+        List<FlowNode> answer = traverseTree(flowNodes, new TreeMap<>());
         sortInNodeIdOrder(answer);
         getEndNode(flowNodes);
         return answer;
     }
 
-    private static void getEndNode(final List<FlowNode> flowNodes) {
+    private static void getEndNode(List<FlowNode> flowNodes) {
         for (FlowNode node : flowNodes) {
             if (endNode == null || Integer.parseInt(endNode.getId()) < Integer.parseInt(node.getId())) {
                 endNode = node;
@@ -85,14 +85,7 @@ public class FlowNodes {
     }
 
     public static void sortInNodeIdOrder(List<FlowNode> answer) {
-        // lets sort by node id
-        Comparator<? super FlowNode> comparator = new Comparator<FlowNode>() {
-            @Override
-            public int compare(FlowNode o1, FlowNode o2) {
-                return getNodeIdNumber(o1) - getNodeIdNumber(o2);
-            }
-        };
-        Collections.sort(answer, comparator);
+        answer.sort(Comparator.comparingInt(FlowNodes::getNodeIdNumber));
     }
 
     public static int getNodeIdNumber(FlowNode node) {
@@ -101,7 +94,7 @@ public class FlowNodes {
             try {
                 return Integer.parseInt(id);
             } catch (NumberFormatException e) {
-                LOG.warning("Failed to parse FlowNode id " + id + ". " + e);
+                logger.warn("Failed to parse FlowNode id [{}].", id);
             }
         }
         return 0;
@@ -120,5 +113,4 @@ public class FlowNodes {
         }
         return 0;
     }
-
 }
