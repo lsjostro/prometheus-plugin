@@ -48,4 +48,3 @@ a ticket number.
 * The core team will look at Pull Requests on a regular basis in a weekly triage meeting.
 * After feedback has been given we expect responses within two weeks. After two
   weeks we may close the pull request if it isn't showing any activity.
-  
