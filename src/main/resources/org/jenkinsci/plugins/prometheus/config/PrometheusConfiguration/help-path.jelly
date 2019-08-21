@@ -17,6 +17,11 @@
   </div>
   <div>
     <p>
+      Collecting metrics period in seconds (effectively loaded after restart).
+    </p>
+  </div>
+  <div>
+    <p>
       Count the duration of successful builds.
     </p>
   </div>
