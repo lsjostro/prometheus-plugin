@@ -10,6 +10,9 @@
     <f:entry title="${%Enable authentication for prometheus end-point}" field="useAuthenticatedEndpoint">
       <f:checkbox/>
     </f:entry>
+    <f:entry title="${%Collecting metrics period in seconds}" field="collectingMetricsPeriodInSeconds">
+      <f:number clazz="required positive-number"/>
+    </f:entry>
     <f:entry title="${%Count duration of successful builds}" field="countSuccessfulBuilds">
       <f:checkbox/>
     </f:entry>

@@ -2,14 +2,14 @@ package org.jenkinsci.plugins.prometheus.util;
 
 import org.jenkinsci.plugins.workflow.actions.LabelAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import static org.assertj.core.api.Assertions.*;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.jenkinsci.plugins.prometheus.util.FlowNodes.getSortedStageNodes;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +24,6 @@ public class FlowNodesTest {
         when(topNode.getParents()).thenReturn(nodeList);
         when(topNode.getAction(LabelAction.class)).thenReturn(mock(LabelAction.class));
         List<FlowNode> sortedNodes = getSortedStageNodes(nodeList);
-        assertEquals(1, sortedNodes.size());
+        assertThat(sortedNodes).hasSize(1);
     }
 }

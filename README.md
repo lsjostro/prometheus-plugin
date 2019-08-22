@@ -17,6 +17,8 @@ duration of jobs and pipeline stages
 
 `PROMETHEUS_ENDPOINT` REST Endpoint (Default: `prometheus`)
 
+`COLLECTING_METRICS_PERIOD_IN_SECONDS` Async task period in seconds (Default: `120` seconds)
+
 ## Building
 
     mvn clean install
