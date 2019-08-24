@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>prometheus</artifactId>
-  <version>2.0.6-SNAPSHOT</version>
+  <version>2.0.6</version>
   <packaging>hpi</packaging>
   <name>Prometheus metrics plugin</name>
   <description>Expose Jenkins metrics in prometheus format</description>
@@ -55,7 +55,7 @@
     <connection>scm:git:ssh://github.com/jenkinsci/prometheus-plugin.git</connection>
     <developerConnection>scm:git:ssh://github.com/jenkinsci/prometheus-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/prometheus-plugin/</url>
-    <tag>prometheus-2.0.4</tag>
+    <tag>prometheus-2.0.6</tag>
   </scm>
 
   <repositories>
