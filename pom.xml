@@ -52,8 +52,8 @@
   </developers>
 
   <scm>
-    <connection>scm:git:ssh://github.com/jenkinsci/prometheus-plugin.git</connection>
-    <developerConnection>scm:git:ssh://github.com/jenkinsci/prometheus-plugin.git</developerConnection>
+    <connection>scm:git:git://github.com/jenkinsci/prometheus-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/prometheus-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/prometheus-plugin/</url>
     <tag>prometheus-2.0.6</tag>
   </scm>
