@@ -62,27 +62,30 @@ Include screenshots of the before and after if your changes include differences 
 
 Test your changes! Run your changes against any existing tests if they exist and create new ones when needed. Whether tests exist or not, make sure your changes don’t break the existing project.
 
-###  Steps to make a Pull Request
+Getting Started
+Fork this repository on GitHub by clicking the Fork button in the top right of this page.
 
-```bash
-git clone https://github.com/your_github_username/prometheus-plugin.git
+Clone your forked repo to your local machine.
+git clone https://github.com/YOUR-USERNAME/prometheus-plugin.git
+Replace YOUR-USERNAME above with your GitHub username.
 
-cd prometheus-plugin
+Create a new branch.
+git checkout -b new-branch
 
-git checkout -b branchname
+Add your contributions.
+Have a look at CONTRIBUTING.md. There are 3 easy ways to contribute to this project:
 
-git diff
+Commit and push your changes.
 
-git add -A
+git add -A 
+git commit -m "Your commit message"
+git push --set-upstream origin new-branch
+Create a Pull Request by navigating to your forked repository and clicking the New pull request button on your left-hand side of the page.
 
-git status
+Add in a title, edit the PR template, and then press the Create pull request button.
 
-git commit -m "Write the change you have made"
+Wait for your Pull Request to be reviewed and merged.
 
-git status
+### Congratulations! You just opened a Pull Request.
 
-git push origin branchname
 
-```
-
-## And Voila, you have made your PR! 
