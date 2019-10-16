@@ -13,7 +13,7 @@ public class JenkinsStatusCollector extends Collector {
 
     @Override
     public List<MetricFamilySamples> collect() {
-        String subsystem = "jenkins";
+        String subsystem = ConfigurationUtils.getSubSystem();
         String namespace = ConfigurationUtils.getNamespace();
         List<MetricFamilySamples> samples = new ArrayList<>();
 

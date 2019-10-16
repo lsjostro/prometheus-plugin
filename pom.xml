@@ -22,6 +22,7 @@
     <workflow.api.version>2.15</workflow.api.version>
     <jenkins.metrics.version>4.0.2.5</jenkins.metrics.version>
     <jenkins.junit.version>1.2</jenkins.junit.version>
+    <jenkins.diskUsage.version>0.9</jenkins.diskUsage.version>
     <gson.version>2.3.1</gson.version>
     <JUnitParams.version>1.0.4</JUnitParams.version>
     <httpcore.version>4.4</httpcore.version>
@@ -121,6 +122,11 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>junit</artifactId>
       <version>${jenkins.junit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>cloudbees-disk-usage-simple</artifactId>
+      <version>${jenkins.diskUsage.version}</version>
     </dependency>
 
     <!-- Test only -->

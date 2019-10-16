@@ -53,7 +53,7 @@ public class JobCollector extends Collector {
         List<MetricFamilySamples> samples = new ArrayList<>();
         List<Job> jobs = new ArrayList<>();
         String fullname = "builds";
-        String subsystem = "jenkins";
+        String subsystem = ConfigurationUtils.getSubSystem();
         String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
         String[] labelNameArray = {jobAttribute, "repo"};
         String[] labelStageNameArray = {jobAttribute, "repo", "stage"};
