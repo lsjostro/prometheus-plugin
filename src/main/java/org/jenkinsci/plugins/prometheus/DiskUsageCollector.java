@@ -19,8 +19,6 @@ public class DiskUsageCollector extends Collector {
     private Jenkins jenkins;
     private Gauge directoryUsageGauge;
     private Gauge jobUsageGauge;
-    private static final String[] directoryLabels = {"directory"};
-    private static final String[] jobLabels = {"jobName", "url"};
 
     public DiskUsageCollector() {
         jenkins = Jenkins.get();
@@ -28,14 +26,14 @@ public class DiskUsageCollector extends Collector {
                 .namespace(ConfigurationUtils.getNamespace())
                 .subsystem(ConfigurationUtils.getSubSystem())
                 .name("disk_usage_bytes")
-                .labelNames(directoryLabels)
+                .labelNames("directory")
                 .help("Disk usage of first level folder in JENKINS_HOME in bytes")
                 .create();
         jobUsageGauge = Gauge.build()
                 .namespace(ConfigurationUtils.getNamespace())
                 .subsystem(ConfigurationUtils.getSubSystem())
                 .name("job_usage_bytes")
-                .labelNames(jobLabels)
+                .labelNames("jobName", "url")
                 .help("Amount of disk usage (bytes) for each job in Jenkins")
                 .create();
     }
