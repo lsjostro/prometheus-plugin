@@ -57,7 +57,7 @@ public class JobCollector extends Collector {
         String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
         String[] labelNameArray = {jobAttribute, "repo"};
         String[] labelStageNameArray = {jobAttribute, "repo", "stage"};
-        boolean ignoreDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
+        boolean processDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
         boolean ignoreBuildMetrics =
                 !PrometheusConfiguration.get().isCountAbortedBuilds() &&
                         !PrometheusConfiguration.get().isCountFailedBuilds() &&
@@ -159,7 +159,7 @@ public class JobCollector extends Collector {
         Jobs.forEachJob(job -> {
             logger.debug("Determining if we are already appending metrics for job [{}]", job.getName());
 
-            if (!job.isBuildable() && ignoreDisabledJobs) {
+            if (!job.isBuildable() && processDisabledJobs) {
                 logger.debug("job [{}] is disabled", job.getFullName());
                 return;
             }
