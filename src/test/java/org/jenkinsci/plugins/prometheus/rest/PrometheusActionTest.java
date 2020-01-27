@@ -1,8 +1,16 @@
 package org.jenkinsci.plugins.prometheus.rest;
 
-import io.prometheus.client.exporter.common.TextFormat;
-import jenkins.metrics.api.Metrics;
-import jenkins.model.Jenkins;
+import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import javax.servlet.ServletException;
+
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 import org.jenkinsci.plugins.prometheus.service.PrometheusMetrics;
 import org.junit.Before;
@@ -14,18 +22,19 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import io.prometheus.client.exporter.common.TextFormat;
+import jenkins.metrics.api.Metrics;
+import jenkins.model.Jenkins;
 
-import static groovy.util.GroovyTestCase.assertEquals;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jenkins.class})
+// PowerMockIgnore needed for: https://github.com/powermock/powermock/issues/864
+@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "org.w3c.*", "com.sun.org.apache.xalan.*"})
 public class PrometheusActionTest {
 
     @Mock
@@ -56,7 +65,7 @@ public class PrometheusActionTest {
         // then
         AssertStaplerResponse.from(actual)
                 .call()
-                .assertHttpStatus(404);
+                .assertHttpStatus(HTTP_NOT_FOUND);
     }
 
     @Test
@@ -75,7 +84,7 @@ public class PrometheusActionTest {
         // then
         AssertStaplerResponse.from(actual)
                 .call()
-                .assertHttpStatus(403);
+                .assertHttpStatus(HTTP_FORBIDDEN);
     }
 
     @Test
@@ -96,7 +105,7 @@ public class PrometheusActionTest {
         // then
         AssertStaplerResponse.from(actual)
                 .call()
-                .assertHttpStatus(200)
+                .assertHttpStatus(HTTP_OK)
                 .assertContentType(TextFormat.CONTENT_TYPE_004)
                 .assertHttpHeader("Cache-Control", "must-revalidate,no-cache,no-store")
                 .assertBody(responseBody);
