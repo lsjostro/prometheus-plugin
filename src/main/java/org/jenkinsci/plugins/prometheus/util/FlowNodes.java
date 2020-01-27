@@ -1,5 +1,14 @@
 package org.jenkinsci.plugins.prometheus.util;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+
 import org.jenkinsci.plugins.workflow.actions.LabelAction;
 import org.jenkinsci.plugins.workflow.actions.ThreadNameAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
@@ -7,11 +16,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeMap;
 
 /**
  * Helper methods for working with flow nodes
@@ -29,27 +33,78 @@ public class FlowNodes {
     }
 
     /**
-     * Recursively traverses through all nodes and serializes the stage nodes
+     * Retrieve boxed node Id from a FlowNode. Utility
+     * function to make this retrieval easy and efficient.
+     * @param node Node to retrieve the Id from.
+     * @return Boxed node Id.
      */
-    public static List<FlowNode> traverseTree(List<FlowNode> nodes, TreeMap<Integer, Boolean> detector) {
-        List<FlowNode> answer = new ArrayList<>();
-        if (nodes != null) {
-            for (FlowNode node : nodes) {
-                int id = Integer.parseInt(node.getId());
-                if (detector.get(id) != null) {
-                    // already added
-                    return answer;
-                }
+    private static Integer getNodeId(final FlowNode node) {
+        return Integer.valueOf(node.getId());
+    }
 
-                detector.put(id, true);
-                if (isStageNode(node)) {
-                    answer.add(node);
-                }
-
-                answer.addAll(traverseTree(node.getParents(), detector));
+    /**
+     * Traverse through all nodes (iterative, BFS)
+     * and collect the stage nodes.
+     * @param nodes Nodes to traverse through to find all the stage nodes.
+     * @return All stage nodes in the parent trees of the nodes list.
+     */
+    public static List<FlowNode> traverseTree(final List<FlowNode> nodes) {
+        if (nodes == null) {
+            return Collections.emptyList();
+        }
+        final Set<Integer> visited = new HashSet<>();
+        final List<FlowNode> stageNodes = new ArrayList<>();
+        for (final FlowNode node : nodes) {
+            if (!visited.contains(getNodeId(node))) {
+                visitNode(node, stageNodes, visited);
+            } else {
+                return stageNodes;
             }
         }
-        return answer;
+        return stageNodes;
+    }
+
+    /**
+     * Visits all the parents of the given flow node
+     * using iterative breadth-first-search and builds
+     * a list of all nodes encountered that meet the stage
+     * node criteria.
+     *
+     * Aborts traversal and returns currently built list
+     * if a collision in the visited set occurs.
+     * @param node The node to visit and start the traversal.
+     * @param stageNodes List to contain the discovered stage nodes.
+     * @param visited Node Ids that have already been visited.
+     */
+    private static void visitNode(final FlowNode node, final List<FlowNode> stageNodes, final Set<Integer> visited) {
+        if (node == null) {
+            return;
+        }
+        final Queue<FlowNode> queue = new ArrayDeque<>();
+        queue.add(node);
+        while (!queue.isEmpty()) {
+            final FlowNode current = queue.poll();
+            final Integer id = getNodeId(current);
+            if (visited.contains(id)) {
+                return;
+            }
+            visited.add(id);
+            if (isStageNode(current)) {
+                stageNodes.add(current);
+            }
+            final List<FlowNode> parents = node.getParents();
+            if (parents == null) {
+                continue;
+            }
+            for (final FlowNode next : parents) {
+                final Integer nextId = getNodeId(next);
+                if (visited.contains(nextId)) {
+                    return;
+                }
+                visited.add(nextId);
+                queue.add(next);
+            }
+        }
     }
 
     public static FlowNode getNextStageNode(FlowNode node) {
@@ -70,7 +125,7 @@ public class FlowNodes {
     }
 
     public static List<FlowNode> getSortedStageNodes(List<FlowNode> flowNodes) {
-        List<FlowNode> answer = traverseTree(flowNodes, new TreeMap<>());
+        List<FlowNode> answer = traverseTree(flowNodes);
         sortInNodeIdOrder(answer);
         getEndNode(flowNodes);
         return answer;
