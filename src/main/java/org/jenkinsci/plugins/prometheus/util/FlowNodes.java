@@ -55,9 +55,10 @@ public class FlowNodes {
         final Set<Integer> visited = new HashSet<>();
         final List<FlowNode> stageNodes = new ArrayList<>();
         for (final FlowNode node : nodes) {
-            if (!visited.contains(getNodeId(node))) {
-                visitNode(node, stageNodes, visited);
-            } else {
+            if (visited.contains(getNodeId(node))) {
+                return stageNodes;
+            }
+            if (!visitNode(node, stageNodes, visited)) {
                 return stageNodes;
             }
         }
@@ -72,13 +73,15 @@ public class FlowNodes {
      *
      * Aborts traversal and returns currently built list
      * if a collision in the visited set occurs.
+     *
      * @param node The node to visit and start the traversal.
      * @param stageNodes List to contain the discovered stage nodes.
      * @param visited Node Ids that have already been visited.
+     * @return true if traversal should continue, false if already visited node encountered (abort traversal).
      */
-    private static void visitNode(final FlowNode node, final List<FlowNode> stageNodes, final Set<Integer> visited) {
+    private static boolean visitNode(final FlowNode node, final List<FlowNode> stageNodes, final Set<Integer> visited) {
         if (node == null) {
-            return;
+            return true;
         }
         final Queue<FlowNode> queue = new ArrayDeque<>();
         queue.add(node);
@@ -86,7 +89,7 @@ public class FlowNodes {
             final FlowNode current = queue.poll();
             final Integer id = getNodeId(current);
             if (visited.contains(id)) {
-                return;
+                return false;
             }
             visited.add(id);
             if (isStageNode(current)) {
@@ -99,12 +102,13 @@ public class FlowNodes {
             for (final FlowNode next : parents) {
                 final Integer nextId = getNodeId(next);
                 if (visited.contains(nextId)) {
-                    return;
+                    return false;
                 }
                 visited.add(nextId);
                 queue.add(next);
             }
         }
+        return true;
     }
 
     public static FlowNode getNextStageNode(FlowNode node) {
