@@ -100,11 +100,9 @@ public class FlowNodes {
                 continue;
             }
             for (final FlowNode next : parents) {
-                final Integer nextId = getNodeId(next);
-                if (visited.contains(nextId)) {
+                if (visited.contains(getNodeId(next))) {
                     return false;
                 }
-                visited.add(nextId);
                 queue.add(next);
             }
         }
