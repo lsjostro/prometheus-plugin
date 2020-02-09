@@ -1,0 +1,3 @@
+_extends: .github
+tag-template: prometheus-$NEXT_PATCH_VERSION
+version-template: $MAJOR.$MINOR.$PATCH
