@@ -172,6 +172,7 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>cloudbees-disk-usage-simple</artifactId>
       <version>${jenkins.diskUsage.version}</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
