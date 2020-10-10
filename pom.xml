@@ -33,6 +33,10 @@
     <system-rules.version>1.19.0</system-rules.version>
     <assertj-core.version>3.14.0</assertj-core.version>
     <slf4j.version>1.7.26</slf4j.version>
+    <pipeline.rest.api.version>2.15</pipeline.rest.api.version>
+    <workflow.support.version>3.3</workflow.support.version>
+    <pipeline.graph.analysis.version>1.9</pipeline.graph.analysis.version>
+    <script.security.version>1.56</script.security.version>
   </properties>
 
   <organization>
@@ -84,9 +88,19 @@
       <version>${workflow.api.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
+      <artifactId>pipeline-rest-api</artifactId>
+      <version>${pipeline.rest.api.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-job</artifactId>
       <version>${workflow.job.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-support</artifactId>
+      <version>${workflow.support.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -95,8 +109,18 @@
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>pipeline-graph-analysis</artifactId>
+      <version>${pipeline.graph.analysis.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>structs</artifactId>
       <version>${jenkins.structs.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>script-security</artifactId>
+      <version>${script.security.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
