@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.prometheus;
 
 import com.cloudbees.workflow.rest.external.StageNodeExt;
+import com.cloudbees.workflow.rest.external.StatusExt;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -380,7 +381,7 @@ public class JobCollector extends Collector {
         String stageName = stage.getName();
         String[] labelValueArray = {jobName, repoName, stageName};
 
-        if (stage.getStatus().ordinal() < 2) {
+        if (stage.getStatus() == StatusExt.SUCCESS || stage.getStatus() == StatusExt.UNSTABLE) {
             logger.debug("getting duration for stage[{}] in run [{}] from job [{}]", stage.getName(), run.getNumber(), job.getName());
             long duration = stage.getDurationMillis();
             logger.debug("duration was [{}] for stage[{}] in run [{}] from job [{}]", duration, stage.getName(), run.getNumber(), job.getName());
