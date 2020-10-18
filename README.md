@@ -66,8 +66,6 @@ Getting Started
 Fork this repository on GitHub by clicking the Fork button in the top right of this page.
 
 Clone your forked repo to your local machine.
-git clone https://github.com/YOUR-USERNAME/prometheus-plugin.git
-Replace YOUR-USERNAME above with your GitHub username.
 
 Create a new branch.
 git checkout -b new-branch
