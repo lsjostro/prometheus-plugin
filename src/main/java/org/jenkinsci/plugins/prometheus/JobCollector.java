@@ -213,10 +213,10 @@ public class JobCollector extends Collector {
 
         Jobs.forEachJob(job -> {
             if (!job.isBuildable() && processDisabledJobs) {
-                logger.info("job [{}] is disabled", job.getFullName());
+                logger.debug("job [{}] is disabled", job.getFullName());
                 return;
             }
-            logger.info("Collecting metrics for job [{}]", job.getFullName());
+            logger.debug("Collecting metrics for job [{}]", job.getFullName());
             appendJobMetrics(job);
         });
 
