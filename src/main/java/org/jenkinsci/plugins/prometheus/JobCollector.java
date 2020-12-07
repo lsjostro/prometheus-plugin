@@ -307,7 +307,7 @@ public class JobCollector extends Collector {
             logger.debug("getting metrics for run [{}] from job [{}]", run.getNumber(), job.getName());
             if (Runs.includeBuildInMetrics(run)) {
                 logger.debug("getting build info for run [{}] from job [{}]", run.getNumber(), job.getName());
-                String params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + e.getValue().toString()).collect(Collectors.joining(";"));
+                String params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
                 String resultString = "UNDEFINED";
                 runResult = run.getResult();
                 if (runResult != null) {
