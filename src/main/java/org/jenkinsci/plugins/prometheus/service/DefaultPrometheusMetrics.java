@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DefaultPrometheusMetrics implements PrometheusMetrics {
 
@@ -51,9 +53,14 @@ public class DefaultPrometheusMetrics implements PrometheusMetrics {
     public void collectMetrics() {
         try (StringWriter buffer = new StringWriter()) {
             TextFormat.write004(buffer, collectorRegistry.metricFamilySamples());
-            cachedMetrics.set(buffer.toString());
+            cachedMetrics.set(formatMetrics(buffer.toString()));
         } catch (IOException e) {
             logger.debug("Unable to collect metrics");
         }
+    }
+
+    private String formatMetrics(String formatString) {
+        formatString = formatString.replaceAll("jenkins_node_(.*)_build_count (.*)", "jenkis_node_build_count{node=\"master\" $1");
+        return formatString.replaceAll("jenkins_node_(.*)_build_count (.*)", "jenkins_node_build_count{node=\"$1\"} $2");
     }
 }
