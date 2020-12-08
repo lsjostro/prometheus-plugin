@@ -60,7 +60,7 @@ public class DefaultPrometheusMetrics implements PrometheusMetrics {
     }
 
     private String formatMetrics(String formatString) {
-        formatString = formatString.replaceAll("jenkins_node_(.*)_build_count (.*)", "jenkis_node_build_count{node=\"master\" $1");
+        formatString = formatString.replaceAll("jenkins_node_build_count (.*)", "jenkis_node_build_count{node=\"master\" $1");
         return formatString.replaceAll("jenkins_node_(.*)_build_count (.*)", "jenkins_node_build_count{node=\"$1\"} $2");
     }
 }
