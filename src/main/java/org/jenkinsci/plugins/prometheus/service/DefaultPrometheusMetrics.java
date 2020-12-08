@@ -11,6 +11,7 @@ import org.jenkinsci.plugins.prometheus.DiskUsageCollector;
 import org.jenkinsci.plugins.prometheus.ExecutorCollector;
 import org.jenkinsci.plugins.prometheus.JenkinsStatusCollector;
 import org.jenkinsci.plugins.prometheus.JobCollector;
+import org.jenkinsci.plugins.prometheus.util.MetricsFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,21 +54,9 @@ public class DefaultPrometheusMetrics implements PrometheusMetrics {
     public void collectMetrics() {
         try (StringWriter buffer = new StringWriter()) {
             TextFormat.write004(buffer, collectorRegistry.metricFamilySamples());
-            cachedMetrics.set(formatMetrics(buffer.toString()));
+            cachedMetrics.set(MetricsFormatter.formatMetrics(buffer.toString()));
         } catch (IOException e) {
             logger.debug("Unable to collect metrics");
         }
-    }
-
-    private String formatMetrics(String formatString) {
-        //node specific build counts
-        formatString = formatString.replaceAll("jenkins_node_builds_count (.*)", "jenkins_node_builds_count{node=\"master\"} $1");
-        formatString = formatString.replaceAll("jenkins_node_(.*)_builds_count (.*)", "jenkins_node_builds_count{node=\"$1\"} $2");
-
-        //node specific histograms
-        formatString = formatString.replaceAll("jenkins_node_builds\\{(.*)} (.*)", "jenkins_node_builds{node=\"master\", $1} $2");
-        formatString = formatString.replaceAll("jenkins_node_(.*)_builds\\{(.*)} (.*)", "jenkins_node_builds{node=\"$1\", $2} $3");
-
-        return formatString;
     }
 }
