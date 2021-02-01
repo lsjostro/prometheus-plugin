@@ -51,6 +51,17 @@ You should usually open a pull request in the following situations:
 Submit trivial fixes (for example, a typo, a broken link or an obvious error)
 Start work on a contribution that was already asked for, or that you’ve already discussed, in an issue
 
+### Testing your code
+To run unit tests, use the `test` maven goal, or
+```shell
+mvn test
+```
+
+The automated pipeline also runs static analysis, to run it locally, use the `spotbugs:check` target, or
+```shell
+mvn spotbugs:check
+```
+
 ### Forking a repository
 Fork the repository and clone it locally. Connect your local to the original “upstream” repository by adding it as a remote. Pull in changes from “upstream” often so that you stay up to date so that when you submit your pull request, merge conflicts will be less likely.
 
