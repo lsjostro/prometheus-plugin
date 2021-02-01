@@ -33,7 +33,7 @@ public class JobCollector extends Collector {
     private Counter jobFailedCount;
     private Gauge jobHealthScore;
 
-    private class BuildMetrics {
+    private static class BuildMetrics {
 
         public Gauge jobBuildResultOrdinal;
         public Gauge jobBuildResult;
