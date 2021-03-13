@@ -1,0 +1,17 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <div>
+    <p>
+      Add a "parameters" label to the duration_milliseconds_summary, success_build_count, and
+      failed_build_count metrics which contains the build parameters.  This would allow calculation
+      of the average build duration based on build parameters.
+    </p>
+  </div>
+  <div class="warning">
+    <p>
+      Warning! If the cardinality of your build parameters is high, this will create
+      a large number of metrics.  This can result in poor jenkins and prometheus
+      performance.
+    </p>
+  </div>
+</j:jelly>

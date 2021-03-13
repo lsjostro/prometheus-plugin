@@ -49,6 +49,9 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     private boolean processingDisabledBuilds = false;
 
+    private boolean appendParamLabel = false;
+    private boolean appendStatusLabel = false;
+
     public PrometheusConfiguration() {
         load();
         setPath(urlName);
@@ -75,6 +78,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         collectingMetricsPeriodInSeconds = validateProcessingMetricsPeriodInSeconds(json);
 
         processingDisabledBuilds = json.getBoolean("processingDisabledBuilds");
+        appendParamLabel = json.getBoolean("appendParamLabel");
+        appendStatusLabel = json.getBoolean("appendStatusLabel");
 
         save();
         return super.configure(req, json);
@@ -195,6 +200,24 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setProcessingDisabledBuilds(boolean processingDisabledBuilds) {
         this.processingDisabledBuilds = processingDisabledBuilds;
+        save();
+    }
+
+    public boolean isAppendParamLabel() {
+        return appendParamLabel;
+    }
+
+    public void setAppendParamLabel(boolean appendParamLabel) {
+        this.appendParamLabel = appendParamLabel;
+        save();
+    }
+
+    public boolean isAppendStatusLabel() {
+        return appendStatusLabel;
+    }
+
+    public void setAppendStatusLabel(boolean appendStatusLabel) {
+        this.appendStatusLabel = appendStatusLabel;
         save();
     }
 

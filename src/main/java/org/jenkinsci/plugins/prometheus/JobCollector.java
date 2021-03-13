@@ -50,53 +50,53 @@ public class JobCollector extends Collector {
             this.buildPrefix = buildPrefix;
         }
 
-        public void initCollectors(String fullname, String subsystem, String namespace, String[] labelBaseNameArray, String[] labelStageNameArray) {
+        public void initCollectors(String fullname, String subsystem, String namespace, String[] labelNameArray, String[] labelStageNameArray) {
             this.jobBuildResultOrdinal = Gauge.build()
                     .name(fullname + this.buildPrefix +"_build_result_ordinal")
                     .subsystem(subsystem).namespace(namespace)
-                    .labelNames(labelBaseNameArray)
+                    .labelNames(labelNameArray)
                     .help("Build status of a job.")
                     .create();
 
             this.jobBuildResult = Gauge.build()
                     .name(fullname + this.buildPrefix +"_build_result")
                     .subsystem(subsystem).namespace(namespace)
-                    .labelNames(labelBaseNameArray)
+                    .labelNames(labelNameArray)
                     .help("Build status of a job as a boolean (0 or 1)")
                     .create();
 
             this.jobBuildDuration = Gauge.build()
                     .name(fullname + this.buildPrefix +"_build_duration_milliseconds")
                     .subsystem(subsystem).namespace(namespace)
-                    .labelNames(labelBaseNameArray)
+                    .labelNames(labelNameArray)
                     .help("Build times in milliseconds of last build")
                     .create();
 
             this.jobBuildStartMillis = Gauge.build()
                     .name(fullname + this.buildPrefix +"_build_start_time_milliseconds")
                     .subsystem(subsystem).namespace(namespace)
-                    .labelNames(labelBaseNameArray)
+                    .labelNames(labelNameArray)
                     .help("Last build start timestamp in milliseconds")
                     .create();
 
             this.jobBuildTestsTotal = Gauge.build()
                     .name(fullname + this.buildPrefix +"_build_tests_total")
                     .subsystem(subsystem).namespace(namespace)
-                    .labelNames(labelBaseNameArray)
+                    .labelNames(labelNameArray)
                     .help("Number of total tests during the last build")
                     .create();
 
             this.jobBuildTestsSkipped = Gauge.build()
                     .name(fullname + "_last_build_tests_skipped")
                     .subsystem(subsystem).namespace(namespace)
-                    .labelNames(labelBaseNameArray)
+                    .labelNames(labelNameArray)
                     .help("Number of skipped tests during the last build")
                     .create();
 
             this.jobBuildTestsFailing = Gauge.build()
                     .name(fullname + this.buildPrefix +"_build_tests_failing")
                     .subsystem(subsystem).namespace(namespace)
-                    .labelNames(labelBaseNameArray)
+                    .labelNames(labelNameArray)
                     .help("Number of failing tests during the last build")
                     .create();
 
@@ -122,12 +122,22 @@ public class JobCollector extends Collector {
         String fullname = "builds";
         String subsystem = ConfigurationUtils.getSubSystem();
         String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
+
         String[] labelBaseNameArray = {jobAttribute, "repo"};
-        String[] labelBuildNameArray = Arrays.copyOf(labelBaseNameArray, labelBaseNameArray.length + 2);
-        labelBuildNameArray[labelBaseNameArray.length] = "parameters";
-        labelBuildNameArray[labelBaseNameArray.length + 1] = "status";
+
+        String[] labelNameArray = labelBaseNameArray;
+        if( PrometheusConfiguration.get().isAppendParamLabel() ){
+            labelNameArray = Arrays.copyOf(labelNameArray, labelNameArray.length + 1);
+            labelNameArray[labelNameArray.length - 1] = "parameters";
+        }
+        if( PrometheusConfiguration.get().isAppendStatusLabel() ){
+            labelNameArray = Arrays.copyOf(labelNameArray, labelNameArray.length + 1);
+            labelNameArray[labelNameArray.length - 1] = "status";
+        }
+        
         String[] labelStageNameArray = Arrays.copyOf(labelBaseNameArray, labelBaseNameArray.length + 1);
         labelStageNameArray[labelBaseNameArray.length] = "stage";
+
         boolean processDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
         boolean ignoreBuildMetrics =
                 !PrometheusConfiguration.get().isCountAbortedBuilds() &&
@@ -140,27 +150,32 @@ public class JobCollector extends Collector {
             return samples;
         }
 
+        // Below three metrics use labaelNameArray which might include the optional labels
+        // of "parameters" or "status"
         summary = Summary.build()
                 .name(fullname + "_duration_milliseconds_summary")
                 .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelBaseNameArray)
+                .labelNames(labelNameArray)
                 .help("Summary of Jenkins build times in milliseconds by Job")
                 .create();
 
         jobSuccessCount = Counter.build()
                 .name(fullname + "_success_build_count")
                 .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelBaseNameArray)
+                .labelNames(labelNameArray)
                 .help("Successful build count")
                 .create();
 
         jobFailedCount = Counter.build()
                 .name(fullname + "_failed_build_count")
                 .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelBaseNameArray)
+                .labelNames(labelNameArray)
                 .help("Failed build count")
                 .create();
 
+        // This metric uses "base" labels as it is just the health score reported
+        // by the job object and the optional labels params and status don't make much
+        // sense in this context.
         jobHealthScore = Gauge.build()
                 .name(fullname + "_health_score")
                 .subsystem(subsystem).namespace(namespace)
@@ -168,7 +183,8 @@ public class JobCollector extends Collector {
                 .help("Health score of a job")
                 .create();
 
-        lastBuildMetrics.initCollectors(fullname, subsystem, namespace, labelBuildNameArray, labelStageNameArray);
+        // The lastBuildMetrics are initialized with the "base" labels
+        lastBuildMetrics.initCollectors(fullname, subsystem, namespace, labelBaseNameArray, labelStageNameArray);
 
         Jobs.forEachJob(job -> {
             try{
@@ -179,8 +195,8 @@ public class JobCollector extends Collector {
                 logger.debug("Collecting metrics for job [{}]", job.getFullName());
                 appendJobMetrics(job);
             }
-            catch( Exception e){
-                logger.debug("Caught error when processing job [{}] error [{}]", job.getFullName(), e);
+            catch( Exception e ){
+                logger.warn("Caught error when processing job [{}] error: ", job.getFullName(), e);
             }
             
         });
@@ -220,7 +236,7 @@ public class JobCollector extends Collector {
         if (repoName == null) {
             repoName = "NA";
         }
-        String[] labelValueArray = {job.getFullName(), repoName};
+        String[] baseLabelValueArray = {job.getFullName(), repoName };
 
         Run lastBuild = job.getLastBuild();
         // Never built
@@ -229,39 +245,41 @@ public class JobCollector extends Collector {
             return;
         }
 
-        long duration;
         int score = job.getBuildHealth().getScore();
-        jobHealthScore.labels(labelValueArray).set(score);
+        jobHealthScore.labels(baseLabelValueArray).set(score);
 
-        Result runResult;
-        String resultString = "UNDEFINED";
-        runResult = lastBuild.getResult();
-        if (null != runResult) {
-            resultString = runResult.toString();
-        }
+        processRun(job, lastBuild, baseLabelValueArray, lastBuildMetrics);
 
-        String params = Runs.getBuildParameters(lastBuild).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
-        String[] buildLabelValueArray = {job.getFullName(), repoName, params, lastBuild.isBuilding() ? "RUNNING" : resultString};
-        processRun(job, lastBuild, buildLabelValueArray, lastBuildMetrics);
+        boolean isAppendParamLabel = PrometheusConfiguration.get().isAppendParamLabel();
+        boolean isAppendStatusLabel = PrometheusConfiguration.get().isAppendStatusLabel();
 
         Run run = lastBuild;
         while (run != null) {
             logger.debug("getting metrics for run [{}] from job [{}]", run.getNumber(), job.getName());
             if (Runs.includeBuildInMetrics(run)) {
                 logger.debug("getting build info for run [{}] from job [{}]", run.getNumber(), job.getName());
-                params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
-                resultString = "UNDEFINED";
-                runResult = run.getResult();
-                if (runResult != null) {
-                    resultString = runResult.toString();
-                }
+                
+                Result runResult = run.getResult();
+                String[] labelValueArray = baseLabelValueArray;
 
-                duration = run.getDuration();
+                if( isAppendParamLabel ){
+                    String params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
+                    labelValueArray = Arrays.copyOf(labelValueArray, labelValueArray.length + 1);
+                    labelValueArray[labelValueArray.length - 1] = params;
+                }
+                if( isAppendStatusLabel ){
+                    String resultString = "UNDEFINED";
+                    if (runResult != null) {
+                        resultString = runResult.toString();
+                    }
+                    labelValueArray = Arrays.copyOf(labelValueArray, labelValueArray.length + 1);
+                    labelValueArray[labelValueArray.length - 1] =  run.isBuilding() ? "RUNNING" : resultString;
+                }
+                
+                long duration = run.getDuration();
                 if (!run.isBuilding()) {
                     summary.labels(labelValueArray).observe(duration);
                 }
-
-                runResult = run.getResult();
 
                 if (runResult != null && !run.isBuilding()) {
                     if (runResult.ordinal == 0 || runResult.ordinal == 1) {
