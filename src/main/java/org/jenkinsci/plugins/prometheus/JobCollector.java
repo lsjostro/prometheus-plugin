@@ -50,7 +50,7 @@ public class JobCollector extends Collector {
             this.buildPrefix = buildPrefix;
         }
 
-        public void BuildCollectors(String fullname, String subsystem, String namespace, String[] labelBaseNameArray, String[] labelStageNameArray) {
+        public void initCollectors(String fullname, String subsystem, String namespace, String[] labelBaseNameArray, String[] labelStageNameArray) {
             this.jobBuildResultOrdinal = Gauge.build()
                     .name(fullname + this.buildPrefix +"_build_result_ordinal")
                     .subsystem(subsystem).namespace(namespace)
@@ -108,7 +108,6 @@ public class JobCollector extends Collector {
         }
     }
 
-    private final BuildMetrics buildsSummaryMetrics = new BuildMetrics("");
     private final BuildMetrics lastBuildMetrics = new BuildMetrics("_last");
 
     public JobCollector() {
@@ -124,10 +123,9 @@ public class JobCollector extends Collector {
         String subsystem = ConfigurationUtils.getSubSystem();
         String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
         String[] labelBaseNameArray = {jobAttribute, "repo"};
-        String[] labelBuildNameArray = Arrays.copyOf(labelBaseNameArray, labelBaseNameArray.length + 3);
-        labelBuildNameArray[labelBaseNameArray.length] = "number";
-        labelBuildNameArray[labelBaseNameArray.length + 1] = "parameters";
-        labelBuildNameArray[labelBaseNameArray.length + 2] = "status";
+        String[] labelBuildNameArray = Arrays.copyOf(labelBaseNameArray, labelBaseNameArray.length + 2);
+        labelBuildNameArray[labelBaseNameArray.length] = "parameters";
+        labelBuildNameArray[labelBaseNameArray.length + 1] = "status";
         String[] labelStageNameArray = Arrays.copyOf(labelBaseNameArray, labelBaseNameArray.length + 1);
         labelStageNameArray[labelBaseNameArray.length] = "stage";
         boolean processDisabledJobs = PrometheusConfiguration.get().isProcessingDisabledBuilds();
@@ -170,16 +168,21 @@ public class JobCollector extends Collector {
                 .help("Health score of a job")
                 .create();
 
-        lastBuildMetrics.BuildCollectors(fullname, subsystem, namespace, labelBuildNameArray, labelStageNameArray);
-        buildsSummaryMetrics.BuildCollectors(fullname, subsystem, namespace, labelBuildNameArray, labelStageNameArray);
+        lastBuildMetrics.initCollectors(fullname, subsystem, namespace, labelBuildNameArray, labelStageNameArray);
 
         Jobs.forEachJob(job -> {
-            if (!job.isBuildable() && processDisabledJobs) {
-                logger.debug("job [{}] is disabled", job.getFullName());
-                return;
+            try{
+                if (!job.isBuildable() && processDisabledJobs) {
+                    logger.debug("job [{}] is disabled", job.getFullName());
+                    return;
+                }
+                logger.debug("Collecting metrics for job [{}]", job.getFullName());
+                appendJobMetrics(job);
             }
-            logger.debug("Collecting metrics for job [{}]", job.getFullName());
-            appendJobMetrics(job);
+            catch( Exception e){
+                logger.debug("Caught error when processing job [{}] error [{}]", job.getFullName(), e);
+            }
+            
         });
 
         addSamples(samples, summary.collect(), "Adding [{}] samples from summary");
@@ -188,7 +191,6 @@ public class JobCollector extends Collector {
         addSamples(samples, jobHealthScore.collect(), "Adding [{}] samples from gauge");
 
         addSamples(samples, lastBuildMetrics);
-        addSamples(samples, buildsSummaryMetrics);
 
         return samples;
     }
@@ -220,64 +222,46 @@ public class JobCollector extends Collector {
         }
         String[] labelValueArray = {job.getFullName(), repoName};
 
-        Run run = job.getLastBuild();
+        Run lastBuild = job.getLastBuild();
         // Never built
-        if (null == run) {
+        if (null == lastBuild) {
             logger.debug("job [{}] never built", job.getFullName());
             return;
         }
-
-        /*
-         * _last_build_result _last_build_result_ordinal
-         *
-         * SUCCESS   0 true  - The build had no errors.
-         * UNSTABLE  1 true  - The build had some errors but they were not fatal. For example, some tests failed.
-         * FAILURE   2 false - The build had a fatal error.
-         * NOT_BUILT 3 false - The module was not built.
-         * ABORTED   4 false - The build was manually aborted.
-         */
-        int ordinal = -1; // running
-        // Job is running
 
         long duration;
         int score = job.getBuildHealth().getScore();
         jobHealthScore.labels(labelValueArray).set(score);
 
-        Run lastCompletedBuild = job.getLastCompletedBuild();
         Result runResult;
-        if (lastCompletedBuild != null) {
-            String resultString = "UNDEFINED";
-            runResult = lastCompletedBuild.getResult();
-            if (null != runResult) {
-                ordinal = runResult.ordinal;
-                resultString = runResult.toString();
-            }
-
-            String params = Runs.getBuildParameters(lastCompletedBuild).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
-            String[] BuildLabelValueArray = {job.getFullName(), repoName, String.valueOf(run.getNumber()), params, lastCompletedBuild.isBuilding() ? "RUNNING" : resultString};
-            ordinal = processRun(job, lastCompletedBuild, ordinal, BuildLabelValueArray, lastBuildMetrics);
+        String resultString = "UNDEFINED";
+        runResult = lastBuild.getResult();
+        if (null != runResult) {
+            resultString = runResult.toString();
         }
 
+        String params = Runs.getBuildParameters(lastBuild).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
+        String[] buildLabelValueArray = {job.getFullName(), repoName, params, lastBuild.isBuilding() ? "RUNNING" : resultString};
+        processRun(job, lastBuild, buildLabelValueArray, lastBuildMetrics);
+
+        Run run = lastBuild;
         while (run != null) {
             logger.debug("getting metrics for run [{}] from job [{}]", run.getNumber(), job.getName());
             if (Runs.includeBuildInMetrics(run)) {
                 logger.debug("getting build info for run [{}] from job [{}]", run.getNumber(), job.getName());
-                String params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
-                String resultString = "UNDEFINED";
+                params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
+                resultString = "UNDEFINED";
                 runResult = run.getResult();
                 if (runResult != null) {
                     resultString = runResult.toString();
                 }
-                String[] BuildLabelValueArray = {job.getFullName(), repoName, String.valueOf(run.getNumber()), params, run.isBuilding() ? "RUNNING" : resultString};
+
                 duration = run.getDuration();
                 if (!run.isBuilding()) {
                     summary.labels(labelValueArray).observe(duration);
                 }
 
                 runResult = run.getResult();
-                if (null != runResult) {
-                    ordinal = runResult.ordinal;
-                }
 
                 if (runResult != null && !run.isBuilding()) {
                     if (runResult.ordinal == 0 || runResult.ordinal == 1) {
@@ -286,17 +270,16 @@ public class JobCollector extends Collector {
                         jobFailedCount.labels(labelValueArray).inc();
                     }
                 }
-
-                ordinal = processRun(job, run, ordinal, BuildLabelValueArray, buildsSummaryMetrics);
             }
             run = run.getPreviousBuild();
         }
     }
 
-    private int processRun(Job job, Run run, int ordinal, String[] BuildLabelValueArray, BuildMetrics buildMetrics) {
+    private void processRun(Job job, Run run, String[] buildLabelValueArray, BuildMetrics buildMetrics) {
         long millis;
         Result runResult;
         long duration;
+        int ordinal = -1;
         duration = run.getDuration();
         millis = run.getStartTimeInMillis();
         runResult = run.getResult();
@@ -304,15 +287,25 @@ public class JobCollector extends Collector {
             ordinal = runResult.ordinal;
         }
 
+         /*
+         * _last_build_result _last_build_result_ordinal
+         *
+         * SUCCESS   0 true  - The build had no errors.
+         * UNSTABLE  1 true  - The build had some errors but they were not fatal. For example, some tests failed.
+         * FAILURE   2 false - The build had a fatal error.
+         * NOT_BUILT 3 false - The module was not built.
+         * ABORTED   4 false - The build was manually aborted.
+         */
+        buildMetrics.jobBuildResultOrdinal.labels(buildLabelValueArray).set(ordinal);
+        buildMetrics.jobBuildResult.labels(buildLabelValueArray).set(ordinal < 2 ? 1 : 0);
+
         logger.debug("Processing run [{}] from job [{}]", run.getNumber(), job.getName());
 
-        buildMetrics.jobBuildStartMillis.labels(BuildLabelValueArray).set(millis);
+        buildMetrics.jobBuildStartMillis.labels(buildLabelValueArray).set(millis);
         if (!run.isBuilding()) {
 
-            buildMetrics.jobBuildResultOrdinal.labels(BuildLabelValueArray).set(ordinal);
-            buildMetrics.jobBuildResult.labels(BuildLabelValueArray).set(ordinal < 2 ? 1 : 0);
-            buildMetrics.jobBuildDuration.labels(BuildLabelValueArray).set(duration);
-            processRunTestsResults(run, BuildLabelValueArray, buildMetrics);
+            buildMetrics.jobBuildDuration.labels(buildLabelValueArray).set(duration);
+            processRunTestsResults(run, buildLabelValueArray, buildMetrics);
 
             if (run instanceof WorkflowRun) {
                 logger.debug("run [{}] from job [{}] is of type workflowRun", run.getNumber(), job.getName());
@@ -322,7 +315,6 @@ public class JobCollector extends Collector {
                 }
             }
         }
-        return ordinal;
     }
 
     private void processRunTestsResults(Run run, String[] buildLabelValueArray, BuildMetrics buildMetrics) {
