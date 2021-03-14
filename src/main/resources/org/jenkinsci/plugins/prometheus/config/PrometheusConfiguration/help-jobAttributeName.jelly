@@ -1,0 +1,8 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <div>
+    <p>
+      The attribute name for job data such as xxx_duration_milliseconds_summary(job_attribute_name="x/y/z") used to be job, but it was a saved word for Prometheus.
+    </p>
+  </div>
+</j:jelly>

@@ -1,0 +1,8 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <div>
+    <p>
+      The default namespace (default value is 'default'). Setting this to an empty value will return the build values as Jenkins metrics.
+    </p>
+  </div>
+</j:jelly>
