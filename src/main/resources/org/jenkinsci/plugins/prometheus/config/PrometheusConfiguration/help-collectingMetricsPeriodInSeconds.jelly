@@ -2,7 +2,7 @@
 <j:jelly xmlns:j="jelly:core">
   <div>
     <p>
-      The path where the prometheus metrics should be provided.
+      Collecting metrics period in seconds (effectively loaded after restart).
     </p>
   </div>
 </j:jelly>

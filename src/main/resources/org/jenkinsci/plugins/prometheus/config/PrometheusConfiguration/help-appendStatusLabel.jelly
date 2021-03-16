@@ -1,0 +1,9 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <div>
+    <p>
+      Add a "status" ("SUCCESS", "FAILURE", "RUNNING") label to the duration_milliseconds_summary, 
+      success_build_count, and failed_build_count metrics.
+    </p>
+  </div>
+</j:jelly>

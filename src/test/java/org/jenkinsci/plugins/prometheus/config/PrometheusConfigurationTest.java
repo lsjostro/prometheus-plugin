@@ -129,6 +129,8 @@ public class PrometheusConfigurationTest {
         config.accumulate("countAbortedBuilds", "true");
         config.accumulate("fetchTestResults", "true");
         config.accumulate("processingDisabledBuilds", "false");
+        config.accumulate("appendParamLabel", "false");
+        config.accumulate("appendStatusLabel", "false");
         return config;
     }
 
