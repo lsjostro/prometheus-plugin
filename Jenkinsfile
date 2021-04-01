@@ -34,31 +34,19 @@ pipeline {
             }
          }
       }
-        stage('pre-build') {
-            steps {
-                gitFlowStart()
-            }
-        }
         stage('compile') {
             steps {
                 container(sdp.mavenContainer().name) {
-                    sh  """
-                        export MAVEN_OPTS="-Xmx1024M -XX:MaxPermSize=256M"
-                        mvn compile -B
-                        """
+                    sh "mvn compile -B"
                 }
             }
         }
         stage('build') {
-            when {
-                expression { gitFlowConfig().isBuildRedundant == false }
-            }
             stages {
                 stage('compile') {
                     steps {
                         container(sdp.mavenContainer().name) {
                             sh  """
-                                export MAVEN_OPTS="-Xmx1024M -XX:MaxPermSize=256M"
                                 mvn clean package install -Dmaven.test.skip
                                 mvn hpi:hpi
                                 """
@@ -70,11 +58,6 @@ pipeline {
                         deployMavenArtifacts()
                     }
                 }
-            }
-        }
-        stage('post-build') {
-            steps {
-                gitFlowFinish()
             }
         }
     }
