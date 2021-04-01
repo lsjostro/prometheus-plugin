@@ -40,12 +40,16 @@ pipeline {
             }
         }
         stage('compile') {
-                    steps {
-                        container(sdp.mavenContainer().name) {
-                            sh "mvn compile -B"
-                        }
-                    }
+            steps {
+                container(sdp.mavenContainer().name) {
+                    sh  """
+                        mvn -v
+                        export MAVEN_OPTS="-Xmx1024M -XX:MaxPermSize=256M"
+                        mvn compile -B
+                        """
                 }
+            }
+        }
         stage('build') {
             when {
                 expression { gitFlowConfig().isBuildRedundant == false }
@@ -55,8 +59,8 @@ pipeline {
                     steps {
                         container(sdp.mavenContainer().name) {
                             sh  """
-                                mvn clean
-                                mvn install -B -Prun-its
+                                export MAVEN_OPTS="-Xmx1024M -XX:MaxPermSize=256M"
+                                mvn clean package install -Dmaven.test.skip
                                 mvn hpi:hpi
                                 """
                         }
