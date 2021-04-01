@@ -39,6 +39,13 @@ pipeline {
                 gitFlowStart()
             }
         }
+        stage('compile') {
+                    steps {
+                        container(sdp.mavenContainer().name) {
+                            sh "mvn compile -B"
+                        }
+                    }
+                }
         stage('build') {
             when {
                 expression { gitFlowConfig().isBuildRedundant == false }
@@ -49,8 +56,7 @@ pipeline {
                         container(sdp.mavenContainer().name) {
                             sh  """
                                 mvn clean
-                                MAVEN_OPTS=” -XX:MaxPermSize=256m” 
-                                mvn -Dmaven.test.skip=true install
+                                mvn install -B -Prun-its
                                 mvn hpi:hpi
                                 """
                         }
