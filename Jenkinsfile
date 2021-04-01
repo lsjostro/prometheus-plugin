@@ -1,6 +1,5 @@
 library('sdpj-core-library')
 library('sdpj-build-agents-library')
-library('sdpj-gitflow-library')
 library('sdpj-git-library')
 library('sdpj-docker-library')
 library('sdpj-build-management-library')
@@ -10,12 +9,9 @@ def printEnv() {
 }
 printEnv()
 
-enableGitFlow(artifactType: 'maven')
-
 pipeline {
     agent {
         kubernetes sdp.kubernetesAgent(containers: [
-            sdp.gitFlowContainer(),
             sdp.mavenContainer()
         ])
     }
@@ -34,11 +30,7 @@ pipeline {
             }
          }
       }
-        stage('pre-build') {
-            steps {
-                gitFlowStart()
-            }
-        }
+
         stage('compile') {
             steps {
                 container(sdp.mavenContainer().name) {
@@ -51,9 +43,6 @@ pipeline {
             }
         }
         stage('build') {
-            when {
-                expression { gitFlowConfig().isBuildRedundant == false }
-            }
             stages {
                 stage('compile') {
                     steps {
@@ -71,11 +60,6 @@ pipeline {
                         deployMavenArtifacts()
                     }
                 }
-            }
-        }
-        stage('post-build') {
-            steps {
-                gitFlowFinish()
             }
         }
     }
