@@ -26,14 +26,6 @@ pipeline {
     }
 
     stages {
-      stage('env') {
-          steps {
-            script {
-              printEnv()
-              sh 'env'
-            }
-         }
-      }
         stage('compile') {
             steps {
                 container(sdp.mavenContainer().name) {
@@ -47,7 +39,7 @@ pipeline {
                     steps {
                         container(sdp.mavenContainer().name) {
                             sh  """
-                                mvn clean package install -Dmaven.test.skip
+                                mvn clean install -Dmaven.test.skip
                                 mvn hpi:hpi
                                 """
                         }
