@@ -10,9 +10,12 @@ def printEnv() {
 }
 printEnv()
 
+enableGitFlow(artifactType: 'maven')
+
 pipeline {
     agent {
         kubernetes sdp.kubernetesAgent(containers: [
+            sdp.gitFlowContainer(),
             sdp.mavenContainer()
         ])
     }
@@ -31,12 +34,15 @@ pipeline {
             }
          }
       }
-
+        stage('pre-build') {
+            steps {
+                gitFlowStart()
+            }
+        }
         stage('compile') {
             steps {
                 container(sdp.mavenContainer().name) {
                     sh  """
-                        mvn -v
                         export MAVEN_OPTS="-Xmx1024M -XX:MaxPermSize=256M"
                         mvn compile -B
                         """
@@ -44,6 +50,9 @@ pipeline {
             }
         }
         stage('build') {
+            when {
+                expression { gitFlowConfig().isBuildRedundant == false }
+            }
             stages {
                 stage('compile') {
                     steps {
@@ -61,6 +70,11 @@ pipeline {
                         deployMavenArtifacts()
                     }
                 }
+            }
+        }
+        stage('post-build') {
+            steps {
+                gitFlowFinish()
             }
         }
     }
