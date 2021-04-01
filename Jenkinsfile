@@ -49,7 +49,8 @@ pipeline {
                         container(sdp.mavenContainer().name) {
                             sh  """
                                 mvn clean
-                                mvn install
+                                MAVEN_OPTS=” -XX:MaxPermSize=256m” 
+                                mvn -Dmaven.test.skip=true install
                                 mvn hpi:hpi
                                 """
                         }
