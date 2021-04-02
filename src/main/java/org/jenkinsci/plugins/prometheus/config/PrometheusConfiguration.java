@@ -37,6 +37,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private String additionalPath;
     private String defaultNamespace = "default";
     private String jobAttributeName = "jenkins_job";
+    private boolean defaultCollectDiskUsage = true;
     private boolean useAuthenticatedEndpoint;
     private Long collectingMetricsPeriodInSeconds = null;
 
@@ -81,6 +82,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         appendParamLabel = json.getBoolean("appendParamLabel");
         appendStatusLabel = json.getBoolean("appendStatusLabel");
 
+        defaultCollectDiskUsage = json.getBoolean("collectDiskUsage");
         save();
         return super.configure(req, json);
     }
@@ -116,6 +118,15 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     public void setDefaultNamespace(String path) {
         this.defaultNamespace = path;
         save();
+    }
+
+    public void setDefaultCollectDiskUsage(boolean collectDiskUsage) {
+        this.defaultCollectDiskUsage = collectDiskUsage;
+        save();
+    }
+
+    public boolean getDefaultCollectDiskUsage() {
+        return defaultCollectDiskUsage;
     }
 
     public long getCollectingMetricsPeriodInSeconds() {

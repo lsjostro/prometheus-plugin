@@ -43,5 +43,8 @@
     <f:entry title="${%Job attribute name}" field="jobAttributeName">
       <f:textbox/>
     </f:entry>
+    <f:entry title="${%Collect disk usage}" field="collectDiskUsage">
+      <f:checkbox/>
+    </f:entry>
   </f:section>
 </j:jelly>

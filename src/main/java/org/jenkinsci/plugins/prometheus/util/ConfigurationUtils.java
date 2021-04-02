@@ -17,4 +17,14 @@ public class ConfigurationUtils {
     public static String getSubSystem() {
         return "jenkins";
     }
+
+    public static boolean getCollectDiskUsage() {
+        String envCollectDiskUsage = System.getenv("COLLECT_DISK_USAGE");
+        if(StringUtils.isEmpty(envCollectDiskUsage)) {
+            return PrometheusConfiguration.get().getDefaultCollectDiskUsage();
+        }
+        else {
+            return Boolean.parseBoolean(envCollectDiskUsage);
+        }
+    }
 }

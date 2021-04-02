@@ -19,6 +19,7 @@ public class DiskUsageCollector extends Collector {
     private Jenkins jenkins;
     private Gauge directoryUsageGauge;
     private Gauge jobUsageGauge;
+    private boolean collectDiskUsage;
 
     public DiskUsageCollector() {
         jenkins = Jenkins.get();
@@ -36,12 +37,16 @@ public class DiskUsageCollector extends Collector {
                 .labelNames("jobName", "url")
                 .help("Amount of disk usage (bytes) for each job in Jenkins")
                 .create();
+
+        this.collectDiskUsage = ConfigurationUtils.getCollectDiskUsage();
     }
 
     @Override
     @Nonnull
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> samples = new ArrayList<>();
+        if(!this.collectDiskUsage) { return samples; }
+
         try {
             QuickDiskUsagePlugin diskUsagePlugin = jenkins.getPlugin(QuickDiskUsagePlugin.class);
             if (diskUsagePlugin == null) {
