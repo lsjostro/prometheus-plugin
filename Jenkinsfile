@@ -1,6 +1,6 @@
 library('sdpj-core-library')
 library('sdpj-build-agents-library')
-library('sdpj-gitflow-library@feature/empty-argline')
+library('sdpj-gitflow-library')
 library('sdpj-git-library')
 library('sdpj-docker-library')
 library('sdpj-build-management-library')
