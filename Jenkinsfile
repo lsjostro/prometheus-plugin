@@ -10,7 +10,7 @@ def printEnv() {
 }
 printEnv()
 
-enableGitFlow(artifactType: 'maven')
+enableGithubFlow(artifactType: 'maven')
 
 pipeline {
     agent {
