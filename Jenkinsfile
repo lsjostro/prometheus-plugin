@@ -26,6 +26,11 @@ pipeline {
     }
 
     stages {
+        stage('pre-build') {
+            steps {
+                gitHubFlowStart()
+            }
+        }
         stage('compile') {
             steps {
                 container(sdp.mavenContainer().name) {
@@ -50,6 +55,11 @@ pipeline {
                         deployMavenArtifacts()
                     }
                 }
+            }
+        }
+        stage('post-build') {
+            steps {
+                gitHubFlowFinish()
             }
         }
     }
