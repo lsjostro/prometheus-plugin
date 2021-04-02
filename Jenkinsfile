@@ -39,6 +39,9 @@ pipeline {
             }
         }
         stage('build') {
+            when {
+                expression { gitFlowConfig().isBuildRedundant == false }
+            }
             stages {
                 stage('compile') {
                     steps {
