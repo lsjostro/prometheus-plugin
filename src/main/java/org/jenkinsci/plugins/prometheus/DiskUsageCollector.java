@@ -5,6 +5,8 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.Gauge;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
+import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +40,7 @@ public class DiskUsageCollector extends Collector {
                 .help("Amount of disk usage (bytes) for each job in Jenkins")
                 .create();
 
-        this.collectDiskUsage = ConfigurationUtils.getCollectDiskUsage();
+        this.collectDiskUsage = PrometheusConfiguration.get().getDefaultCollectDiskUsage();
     }
 
     @Override

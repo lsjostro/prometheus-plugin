@@ -9,7 +9,7 @@ public class ConfigurationUtils {
         String namespace = System.getenv("PROMETHEUS_NAMESPACE");
         if (StringUtils.isEmpty(namespace)) {
             // when the environment variable isn't set, try the system configuration
-            namespace = PrometheusConfiguration.get().getDefaultNamespace();
+            return PrometheusConfiguration.get().getDefaultNamespace();
         }
         return namespace;
     }
@@ -23,8 +23,7 @@ public class ConfigurationUtils {
         if(StringUtils.isEmpty(envCollectDiskUsage)) {
             return PrometheusConfiguration.get().getDefaultCollectDiskUsage();
         }
-        else {
-            return Boolean.parseBoolean(envCollectDiskUsage);
-        }
+        return Boolean.parseBoolean(envCollectDiskUsage);
+
     }
 }
