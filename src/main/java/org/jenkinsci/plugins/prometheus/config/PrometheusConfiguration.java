@@ -52,6 +52,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private boolean appendParamLabel = false;
     private boolean appendStatusLabel = false;
 
+    private String labeledBuildParameterNames = "";
+
     public PrometheusConfiguration() {
         load();
         setPath(urlName);
@@ -80,6 +82,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         processingDisabledBuilds = json.getBoolean("processingDisabledBuilds");
         appendParamLabel = json.getBoolean("appendParamLabel");
         appendStatusLabel = json.getBoolean("appendStatusLabel");
+
+        labeledBuildParameterNames = json.getString("labeledBuildParameterNames");
 
         save();
         return super.configure(req, json);
@@ -229,6 +233,19 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         return additionalPath;
     }
 
+    public String getLabeledBuildParameterNames() {
+        return labeledBuildParameterNames;
+    }
+
+    public void setLabeledBuildParameterNames(String labeledBuildParameterNames) {
+        this.labeledBuildParameterNames = labeledBuildParameterNames;
+    }
+
+    public String[] getLabeledBuildParameterNamesAsArray() {
+        return parseParameterNamesFromStringSeparatedByComma(labeledBuildParameterNames);
+    }
+
+
     public FormValidation doCheckPath(@QueryParameter String value) {
         if (StringUtils.isEmpty(value)) {
             return FormValidation.error(Messages.path_required());
@@ -265,6 +282,13 @@ public class PrometheusConfiguration extends GlobalConfiguration {
             logger.warn(message);
             return DEFAULT_COLLECTING_METRICS_PERIOD_IN_SECONDS;
         }
+    }
+
+    private String[] parseParameterNamesFromStringSeparatedByComma(String stringValue) {
+        if (stringValue==null || stringValue.trim().length() < 1) {
+            return new String[] {};
+        }
+        return stringValue.split("\\s*,\\s*");
     }
 
 }

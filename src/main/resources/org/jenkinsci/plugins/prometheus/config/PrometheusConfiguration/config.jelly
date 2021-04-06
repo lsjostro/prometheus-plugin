@@ -43,5 +43,8 @@
     <f:entry title="${%Job attribute name}" field="jobAttributeName">
       <f:textbox/>
     </f:entry>
+    <f:entry title="${%Build parameters that will be added as separate labels to metrics}" field="labeledBuildParameterNames">
+      <f:textbox />
+    </f:entry>
   </f:section>
 </j:jelly>

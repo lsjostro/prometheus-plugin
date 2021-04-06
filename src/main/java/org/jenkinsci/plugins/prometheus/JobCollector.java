@@ -27,6 +27,8 @@ import static org.jenkinsci.plugins.prometheus.util.FlowNodes.getSortedStageNode
 public class JobCollector extends Collector {
 
     private static final Logger logger = LoggerFactory.getLogger(JobCollector.class);
+    private static final String NOT_AVAILABLE = "NA";
+    private static final String UNDEFINED = "UNDEFINED";
 
     private Summary summary;
     private Counter jobSuccessCount;
@@ -135,6 +137,12 @@ public class JobCollector extends Collector {
             labelNameArray[labelNameArray.length - 1] = "status";
         }
         
+        String[] buildParameterNamesAsArray = PrometheusConfiguration.get().getLabeledBuildParameterNamesAsArray();
+        for (String buildParam : buildParameterNamesAsArray) {
+            labelNameArray = Arrays.copyOf(labelNameArray, labelNameArray.length + 1);
+            labelNameArray[labelNameArray.length - 1] = buildParam.trim();
+        }
+
         String[] labelStageNameArray = Arrays.copyOf(labelBaseNameArray, labelBaseNameArray.length + 1);
         labelStageNameArray[labelBaseNameArray.length] = "stage";
 
@@ -150,7 +158,7 @@ public class JobCollector extends Collector {
             return samples;
         }
 
-        // Below three metrics use labaelNameArray which might include the optional labels
+        // Below three metrics use labelNameArray which might include the optional labels
         // of "parameters" or "status"
         summary = Summary.build()
                 .name(fullname + "_duration_milliseconds_summary")
@@ -195,6 +203,11 @@ public class JobCollector extends Collector {
                 logger.debug("Collecting metrics for job [{}]", job.getFullName());
                 appendJobMetrics(job);
             }
+            catch (IllegalArgumentException e) {
+                if (!e.getMessage().contains("Incorrect number of labels")) {
+                    logger.warn("Caught error when processing job [{}] error: ", job.getFullName(), e);
+                } // else - ignore exception
+            }
             catch( Exception e ){
                 logger.warn("Caught error when processing job [{}] error: ", job.getFullName(), e);
             }
@@ -234,7 +247,7 @@ public class JobCollector extends Collector {
         // Add this to the repo as well so I can group by Github Repository
         String repoName = StringUtils.substringBetween(job.getFullName(), "/");
         if (repoName == null) {
-            repoName = "NA";
+            repoName = NOT_AVAILABLE;
         }
         String[] baseLabelValueArray = {job.getFullName(), repoName };
 
@@ -252,6 +265,7 @@ public class JobCollector extends Collector {
 
         boolean isAppendParamLabel = PrometheusConfiguration.get().isAppendParamLabel();
         boolean isAppendStatusLabel = PrometheusConfiguration.get().isAppendStatusLabel();
+        String[] buildParameterNamesAsArray = PrometheusConfiguration.get().getLabeledBuildParameterNamesAsArray();
 
         Run run = lastBuild;
         while (run != null) {
@@ -268,7 +282,7 @@ public class JobCollector extends Collector {
                     labelValueArray[labelValueArray.length - 1] = params;
                 }
                 if( isAppendStatusLabel ){
-                    String resultString = "UNDEFINED";
+                    String resultString = UNDEFINED;
                     if (runResult != null) {
                         resultString = runResult.toString();
                     }
@@ -276,6 +290,16 @@ public class JobCollector extends Collector {
                     labelValueArray[labelValueArray.length - 1] =  run.isBuilding() ? "RUNNING" : resultString;
                 }
                 
+                for (String configBuildParam : buildParameterNamesAsArray) {
+                    labelValueArray = Arrays.copyOf(labelValueArray, labelValueArray.length + 1);
+                    String paramValue = UNDEFINED;
+                    Object paramInBuild = Runs.getBuildParameters(run).get(configBuildParam);
+                    if (paramInBuild != null) {
+                        paramValue = String.valueOf(paramInBuild);
+                    }
+                    labelValueArray[labelValueArray.length - 1] = paramValue;
+                }
+
                 long duration = run.getDuration();
                 if (!run.isBuilding()) {
                     summary.labels(labelValueArray).observe(duration);
@@ -364,7 +388,7 @@ public class JobCollector extends Collector {
         // Add this to the repo as well so I can group by Github Repository
         String repoName = StringUtils.substringBetween(job.getFullName(), "/");
         if (repoName == null) {
-            repoName = "NA";
+            repoName = NOT_AVAILABLE;
         }
         String jobName = job.getFullName();
         String stageName = stage.getName();
