@@ -1,0 +1,38 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <div>
+    <p>
+      A list of build parameter names, separated by comma.
+      Labels of metrics duration_milliseconds_summary, success_build_count and failed_build_count will be extended with build variables specified here.
+      This would allow to filter metrics by build variable name and value.
+    </p>
+    <p>
+      If no variables will be specified - no additional labels will be added.
+      If the build does not contain build variable specified here - label value will be added as 'UNDEFINED'
+    </p>
+    <p>
+      e.g. build contains build variable 'variable1' and 'variable1' was added to 'Build parameters that will be added as separate labels to metrics' text list.
+      In this case metrics will looks like:
+    </p>
+    <p><i>
+       default_jenkins_builds_duration_milliseconds_summary_count{jenkins_job="job1",variable1="variable_value1"...} 1.0
+    </i></p>
+    <p><i>
+       default_jenkins_builds_duration_milliseconds_summary_count{jenkins_job="job1",variable1="variable_value2"...} 1.0
+    </i></p>
+    <p><i>
+       default_jenkins_builds_duration_milliseconds_summary_count{jenkins_job="job1",variable1=""...} 1.0
+    </i></p>
+    <p><i>
+       default_jenkins_builds_duration_milliseconds_summary_count{jenkins_job="job2",variable1="UNDEFINED"...} 1.0
+    </i></p>
+  </div>
+  <div class="warning">
+    <p>
+      Warning! If the cardinality of your build parameters is high, this will create
+      a large number of metrics.  This can result in poor jenkins and prometheus
+      performance.
+    </p>
+  </div>
+</j:jelly>
+
