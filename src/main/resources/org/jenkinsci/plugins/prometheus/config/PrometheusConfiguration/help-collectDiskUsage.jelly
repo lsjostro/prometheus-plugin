@@ -1,0 +1,8 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <div>
+    <p>
+      If prometheus should collect disk usage or not. Disable this if you are using a cloud storage provider.
+    </p>
+  </div>
+</j:jelly>
