@@ -24,6 +24,5 @@ public class ConfigurationUtils {
             return PrometheusConfiguration.get().getDefaultCollectDiskUsage();
         }
         return Boolean.parseBoolean(envCollectDiskUsage);
-
     }
 }

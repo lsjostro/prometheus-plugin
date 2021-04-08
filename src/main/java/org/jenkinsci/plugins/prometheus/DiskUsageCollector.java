@@ -25,22 +25,24 @@ public class DiskUsageCollector extends Collector {
 
     public DiskUsageCollector() {
         jenkins = Jenkins.get();
-        directoryUsageGauge = Gauge.build()
-                .namespace(ConfigurationUtils.getNamespace())
-                .subsystem(ConfigurationUtils.getSubSystem())
-                .name("disk_usage_bytes")
-                .labelNames("directory")
-                .help("Disk usage of first level folder in JENKINS_HOME in bytes")
-                .create();
-        jobUsageGauge = Gauge.build()
-                .namespace(ConfigurationUtils.getNamespace())
-                .subsystem(ConfigurationUtils.getSubSystem())
-                .name("job_usage_bytes")
-                .labelNames("jobName", "url")
-                .help("Amount of disk usage (bytes) for each job in Jenkins")
-                .create();
+        this.collectDiskUsage = ConfigurationUtils.getCollectDiskUsage();
 
-        this.collectDiskUsage = PrometheusConfiguration.get().getDefaultCollectDiskUsage();
+        if(collectDiskUsage) {
+            directoryUsageGauge = Gauge.build()
+                    .namespace(ConfigurationUtils.getNamespace())
+                    .subsystem(ConfigurationUtils.getSubSystem())
+                    .name("disk_usage_bytes")
+                    .labelNames("directory")
+                    .help("Disk usage of first level folder in JENKINS_HOME in bytes")
+                    .create();
+            jobUsageGauge = Gauge.build()
+                    .namespace(ConfigurationUtils.getNamespace())
+                    .subsystem(ConfigurationUtils.getSubSystem())
+                    .name("job_usage_bytes")
+                    .labelNames("jobName", "url")
+                    .help("Amount of disk usage (bytes) for each job in Jenkins")
+                    .create();
+        }
     }
 
     @Override
@@ -48,7 +50,6 @@ public class DiskUsageCollector extends Collector {
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> samples = new ArrayList<>();
         if(!this.collectDiskUsage) { return samples; }
-
         try {
             QuickDiskUsagePlugin diskUsagePlugin = jenkins.getPlugin(QuickDiskUsagePlugin.class);
             if (diskUsagePlugin == null) {
