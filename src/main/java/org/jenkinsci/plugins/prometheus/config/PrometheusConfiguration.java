@@ -32,12 +32,13 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private static final String DEFAULT_ENDPOINT = "prometheus";
     static final String COLLECTING_METRICS_PERIOD_IN_SECONDS = "COLLECTING_METRICS_PERIOD_IN_SECONDS";
     static final long DEFAULT_COLLECTING_METRICS_PERIOD_IN_SECONDS = TimeUnit.MINUTES.toSeconds(2);
+    private static final String COLLECT_DISK_USAGE = "COLLECT_DISK_USAGE";
+    private static final boolean defaultCollectDiskUsage = true;
 
     private String urlName = null;
     private String additionalPath;
     private String defaultNamespace = "default";
     private String jobAttributeName = "jenkins_job";
-    private boolean defaultCollectDiskUsage = true;
     private boolean useAuthenticatedEndpoint;
     private Long collectingMetricsPeriodInSeconds = null;
 
@@ -52,6 +53,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     private boolean appendParamLabel = false;
     private boolean appendStatusLabel = false;
+
+    private boolean collectDiskUsage = true;
 
     public PrometheusConfiguration() {
         load();
@@ -77,12 +80,11 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         countAbortedBuilds = json.getBoolean("countAbortedBuilds");
         fetchTestResults = json.getBoolean("fetchTestResults");
         collectingMetricsPeriodInSeconds = validateProcessingMetricsPeriodInSeconds(json);
-
         processingDisabledBuilds = json.getBoolean("processingDisabledBuilds");
         appendParamLabel = json.getBoolean("appendParamLabel");
         appendStatusLabel = json.getBoolean("appendStatusLabel");
+        collectDiskUsage = json.getBoolean("collectDiskUsage");
 
-        defaultCollectDiskUsage = json.getBoolean("collectDiskUsage");
         save();
         return super.configure(req, json);
     }
@@ -120,7 +122,11 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         save();
     }
 
-    public void setDefaultCollectDiskUsage(boolean collectDiskUsage) {
+    public void setDefaultCollectDiskUsage(Boolean collectDiskUsage) {
+        if (collectDiskUsage == null) {
+            Map<String, String> env = System.getenv();
+            String result = env.getOrDefault(COLLECT_DISK_USAGE, defaultCollectDiskUsage);
+        }
         this.defaultCollectDiskUsage = collectDiskUsage;
         save();
     }
