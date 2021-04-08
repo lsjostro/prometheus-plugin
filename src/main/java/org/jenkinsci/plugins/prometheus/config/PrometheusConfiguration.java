@@ -60,6 +60,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         load();
         setPath(urlName);
         setCollectingMetricsPeriodInSeconds(collectingMetricsPeriodInSeconds);
+        setCollectDiskUsage(null);
     }
 
     public static PrometheusConfiguration get() {
@@ -125,9 +126,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     public void setCollectDiskUsage(Boolean collectDiskUsage) {
         if (collectDiskUsage == null) {
             Map<String, String> env = System.getenv();
-            String result = env.getOrDefault(COLLECT_DISK_USAGE, "true");
-            logger.warn("env of collect_disk_usage is: " + result);
-            this.collectDiskUsage = Boolean.parseBoolean(result);
+            this.collectDiskUsage = Boolean.parseBoolean(env.getOrDefault(COLLECT_DISK_USAGE, "true"));
         }
         else {
             this.collectDiskUsage = collectDiskUsage;
@@ -139,6 +138,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     public boolean getCollectDiskUsage() {
         return collectDiskUsage;
     }
+
+    public boolean getDefaultCollectDiskUsage() {return defaultCollectDiskUsage; }
 
     public long getCollectingMetricsPeriodInSeconds() {
         return collectingMetricsPeriodInSeconds;
