@@ -70,6 +70,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         setPath(json.getString("path"));
+        setCollectDiskUsage(json.getBoolean("collectDiskUsage"));
         useAuthenticatedEndpoint = json.getBoolean("useAuthenticatedEndpoint");
         defaultNamespace = json.getString("defaultNamespace");
         jobAttributeName = json.getString("jobAttributeName");
@@ -83,7 +84,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         processingDisabledBuilds = json.getBoolean("processingDisabledBuilds");
         appendParamLabel = json.getBoolean("appendParamLabel");
         appendStatusLabel = json.getBoolean("appendStatusLabel");
-        collectDiskUsage = json.getBoolean("collectDiskUsage");
 
         save();
         return super.configure(req, json);
@@ -122,17 +122,22 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         save();
     }
 
-    public void setDefaultCollectDiskUsage(Boolean collectDiskUsage) {
+    public void setCollectDiskUsage(Boolean collectDiskUsage) {
         if (collectDiskUsage == null) {
             Map<String, String> env = System.getenv();
-            String result = env.getOrDefault(COLLECT_DISK_USAGE, defaultCollectDiskUsage);
+            String result = env.getOrDefault(COLLECT_DISK_USAGE, "true");
+            logger.warn("env of collect_disk_usage is: " + result);
+            this.collectDiskUsage = Boolean.parseBoolean(result);
         }
-        this.defaultCollectDiskUsage = collectDiskUsage;
+        else {
+            this.collectDiskUsage = collectDiskUsage;
+        }
+
         save();
     }
 
-    public boolean getDefaultCollectDiskUsage() {
-        return defaultCollectDiskUsage;
+    public boolean getCollectDiskUsage() {
+        return collectDiskUsage;
     }
 
     public long getCollectingMetricsPeriodInSeconds() {

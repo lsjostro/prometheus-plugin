@@ -21,7 +21,7 @@ public class ConfigurationUtils {
     public static boolean getCollectDiskUsage() {
         String envCollectDiskUsage = System.getenv("COLLECT_DISK_USAGE");
         if(StringUtils.isEmpty(envCollectDiskUsage)) {
-            return PrometheusConfiguration.get().getDefaultCollectDiskUsage();
+            return PrometheusConfiguration.get().getCollectDiskUsage();
         }
         return Boolean.parseBoolean(envCollectDiskUsage);
     }
