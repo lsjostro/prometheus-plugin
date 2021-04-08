@@ -33,7 +33,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     static final String COLLECTING_METRICS_PERIOD_IN_SECONDS = "COLLECTING_METRICS_PERIOD_IN_SECONDS";
     static final long DEFAULT_COLLECTING_METRICS_PERIOD_IN_SECONDS = TimeUnit.MINUTES.toSeconds(2);
     private static final String COLLECT_DISK_USAGE = "COLLECT_DISK_USAGE";
-    private static final boolean defaultCollectDiskUsage = true;
+    static final boolean DEFAULT_COLLECT_DISK_USAGE = true;
 
     private String urlName = null;
     private String additionalPath;
@@ -139,7 +139,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         return collectDiskUsage;
     }
 
-    public boolean getDefaultCollectDiskUsage() {return defaultCollectDiskUsage; }
+    public boolean getDefaultCollectDiskUsage() {return DEFAULT_COLLECT_DISK_USAGE; }
 
     public long getCollectingMetricsPeriodInSeconds() {
         return collectingMetricsPeriodInSeconds;

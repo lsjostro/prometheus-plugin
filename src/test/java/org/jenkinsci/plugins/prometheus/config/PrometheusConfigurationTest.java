@@ -84,7 +84,7 @@ public class PrometheusConfigurationTest {
     }
 
     @Test
-    public void shouldSetValueFromEnv() throws Exception{
+    public void shouldSetValueFromEnvForCollectingMetricsPeriodInSeconds() throws Exception{
         // given
         Mockito.doCallRealMethod().when(configuration).setCollectingMetricsPeriodInSeconds(any());
         Mockito.when(configuration.getCollectingMetricsPeriodInSeconds()).thenCallRealMethod();
@@ -97,6 +97,22 @@ public class PrometheusConfigurationTest {
 
         // then
         assertThat(actual).isEqualTo(1000);
+    }
+
+    @Test
+    public void shouldSetValueFromEnvForCollectDiskUsage() throws Exception{
+        // given
+        Mockito.doCallRealMethod().when(configuration).setCollectDiskUsage(any());
+        Mockito.when(configuration.getCollectDiskUsage()).thenCallRealMethod();
+        Boolean collectDiskUsage = null;
+
+        // when
+        withEnvironmentVariable(String.valueOf(PrometheusConfiguration.DEFAULT_COLLECT_DISK_USAGE), String.valueOf(true))
+                .execute(() -> configuration.setCollectDiskUsage(collectDiskUsage));
+        boolean actual = configuration.getCollectDiskUsage();
+
+        // then
+        assertThat(actual).isEqualTo(true);
     }
 
     @Test
