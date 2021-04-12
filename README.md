@@ -19,6 +19,9 @@ duration of jobs and pipeline stages
 
 `COLLECTING_METRICS_PERIOD_IN_SECONDS` Async task period in seconds (Default: `120` seconds)
 
+`COLLECT_DISK_USAGE` Should the plugin collect disk usage information. Set this to false if you are running Jenkins against a cloud-based storage backend, in order to avoid scanning virtually unlimited storage.
+
+
 ## Building
 
     mvn clean install

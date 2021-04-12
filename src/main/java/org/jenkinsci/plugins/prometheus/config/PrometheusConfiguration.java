@@ -32,6 +32,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private static final String DEFAULT_ENDPOINT = "prometheus";
     static final String COLLECTING_METRICS_PERIOD_IN_SECONDS = "COLLECTING_METRICS_PERIOD_IN_SECONDS";
     static final long DEFAULT_COLLECTING_METRICS_PERIOD_IN_SECONDS = TimeUnit.MINUTES.toSeconds(2);
+    private static final String COLLECT_DISK_USAGE = "COLLECT_DISK_USAGE";
+    static final boolean DEFAULT_COLLECT_DISK_USAGE = true;
 
     private String urlName = null;
     private String additionalPath;
@@ -52,12 +54,17 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private boolean appendParamLabel = false;
     private boolean appendStatusLabel = false;
 
+
     private String labeledBuildParameterNames = "";
+
+    private boolean collectDiskUsage = true;
+
 
     public PrometheusConfiguration() {
         load();
         setPath(urlName);
         setCollectingMetricsPeriodInSeconds(collectingMetricsPeriodInSeconds);
+        setCollectDiskUsage(null);
     }
 
     public static PrometheusConfiguration get() {
@@ -68,6 +75,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         setPath(json.getString("path"));
+        setCollectDiskUsage(json.getBoolean("collectDiskUsage"));
         useAuthenticatedEndpoint = json.getBoolean("useAuthenticatedEndpoint");
         defaultNamespace = json.getString("defaultNamespace");
         jobAttributeName = json.getString("jobAttributeName");
@@ -78,12 +86,11 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         countAbortedBuilds = json.getBoolean("countAbortedBuilds");
         fetchTestResults = json.getBoolean("fetchTestResults");
         collectingMetricsPeriodInSeconds = validateProcessingMetricsPeriodInSeconds(json);
-
         processingDisabledBuilds = json.getBoolean("processingDisabledBuilds");
         appendParamLabel = json.getBoolean("appendParamLabel");
         appendStatusLabel = json.getBoolean("appendStatusLabel");
 
-        labeledBuildParameterNames = json.getString("labeledBuildParameterNames");
+      labeledBuildParameterNames = json.getString("labeledBuildParameterNames");
 
         save();
         return super.configure(req, json);
@@ -121,6 +128,24 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         this.defaultNamespace = path;
         save();
     }
+
+    public void setCollectDiskUsage(Boolean collectDiskUsage) {
+        if (collectDiskUsage == null) {
+            Map<String, String> env = System.getenv();
+            this.collectDiskUsage = Boolean.parseBoolean(env.getOrDefault(COLLECT_DISK_USAGE, "true"));
+        }
+        else {
+            this.collectDiskUsage = collectDiskUsage;
+        }
+
+        save();
+    }
+
+    public boolean getCollectDiskUsage() {
+        return collectDiskUsage;
+    }
+
+    public boolean getDefaultCollectDiskUsage() {return DEFAULT_COLLECT_DISK_USAGE; }
 
     public long getCollectingMetricsPeriodInSeconds() {
         return collectingMetricsPeriodInSeconds;
