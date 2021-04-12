@@ -37,7 +37,7 @@
     <workflow.support.version>3.8</workflow.support.version>
     <pipeline.graph.analysis.version>1.9</pipeline.graph.analysis.version>
     <script.security.version>1.76</script.security.version>
-    <jackson2.version>2.12.1</jackson2.version>
+    <jackson2.version>2.12.2</jackson2.version>
   </properties>
 
   <organization>
