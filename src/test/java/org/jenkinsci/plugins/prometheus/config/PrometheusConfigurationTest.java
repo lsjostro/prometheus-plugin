@@ -147,6 +147,7 @@ public class PrometheusConfigurationTest {
         config.accumulate("processingDisabledBuilds", "false");
         config.accumulate("appendParamLabel", "false");
         config.accumulate("appendStatusLabel", "false");
+        config.accumulate("labeledBuildParameterNames", "");
         config.accumulate("collectDiskUsage", "true");
         return config;
     }
