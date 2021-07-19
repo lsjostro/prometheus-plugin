@@ -22,7 +22,7 @@
     <prometheus.simpleClientJava.version>0.11.0</prometheus.simpleClientJava.version>
     <workflow.api.version>2.46</workflow.api.version>
     <workflow.job.version>2.41</workflow.job.version>
-    <workflow.step.version>2.23</workflow.step.version>
+    <workflow.step.version>2.24</workflow.step.version>
     <jenkins.metrics.version>4.0.2.8</jenkins.metrics.version>
     <jenkins.junit.version>1.51</jenkins.junit.version>
     <jenkins.diskUsage.version>0.10</jenkins.diskUsage.version>
