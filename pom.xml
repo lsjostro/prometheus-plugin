@@ -36,7 +36,7 @@
     <pipeline.rest.api.version>2.15</pipeline.rest.api.version>
     <workflow.support.version>3.8</workflow.support.version>
     <pipeline.graph.analysis.version>1.11</pipeline.graph.analysis.version>
-    <script.security.version>1.77</script.security.version>
+    <script.security.version>1.78</script.security.version>
     <jackson2.version>2.12.4</jackson2.version>
   </properties>
 
