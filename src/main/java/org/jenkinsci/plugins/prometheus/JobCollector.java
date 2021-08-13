@@ -125,7 +125,7 @@ public class JobCollector extends Collector {
         String subsystem = ConfigurationUtils.getSubSystem();
         String jobAttribute = PrometheusConfiguration.get().getJobAttributeName();
 
-        String[] labelBaseNameArray = {jobAttribute, "repo"};
+        String[] labelBaseNameArray = {jobAttribute, "repo", "buildable"};
 
         String[] labelNameArray = labelBaseNameArray;
         if( PrometheusConfiguration.get().isAppendParamLabel() ){
@@ -249,7 +249,7 @@ public class JobCollector extends Collector {
         if (repoName == null) {
             repoName = NOT_AVAILABLE;
         }
-        String[] baseLabelValueArray = {job.getFullName(), repoName };
+        String[] baseLabelValueArray = {job.getFullName(), repoName, String.valueOf( job.isBuildable() ) };
 
         Run lastBuild = job.getLastBuild();
         // Never built
