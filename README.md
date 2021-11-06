@@ -28,7 +28,6 @@ duration of jobs and pipeline stages
     mvn hpi:hpi
 
 ## Author / Maintainer
-[Lars Sjöström](https://github.com/lsjostro)
 
 [Marky Jackson](https://github.com/markyjackson-taulia)
 
