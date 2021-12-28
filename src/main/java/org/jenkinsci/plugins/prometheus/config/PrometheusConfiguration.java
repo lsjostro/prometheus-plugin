@@ -132,7 +132,9 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     public void setCollectDiskUsage(Boolean collectDiskUsage) {
         if (collectDiskUsage == null) {
             Map<String, String> env = System.getenv();
-            this.collectDiskUsage = Boolean.parseBoolean(env.getOrDefault(COLLECT_DISK_USAGE, "true"));
+            this.collectDiskUsage = Boolean.parseBoolean(
+                env.getOrDefault(COLLECT_DISK_USAGE, String.valueOf(DEFAULT_COLLECT_DISK_USAGE))
+            );
         }
         else {
             this.collectDiskUsage = collectDiskUsage;
@@ -145,7 +147,14 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         return collectDiskUsage;
     }
 
-    public boolean getDefaultCollectDiskUsage() {return DEFAULT_COLLECT_DISK_USAGE; }
+    /**
+     * Do not use it.
+     * @deprecated the method is not used in the plugin and will be removed in the future.
+     */
+    @Deprecated
+    public boolean getDefaultCollectDiskUsage() {
+        return DEFAULT_COLLECT_DISK_USAGE;
+    }
 
     public long getCollectingMetricsPeriodInSeconds() {
         return collectingMetricsPeriodInSeconds;
