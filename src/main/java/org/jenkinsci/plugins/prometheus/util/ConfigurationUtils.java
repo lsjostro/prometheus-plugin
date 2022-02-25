@@ -19,6 +19,10 @@ public class ConfigurationUtils {
     }
 
     public static boolean getCollectDiskUsage() {
-        return PrometheusConfiguration.get().getCollectDiskUsage();
+        String envCollectDiskUsage = System.getenv("COLLECT_DISK_USAGE");
+        if(StringUtils.isEmpty(envCollectDiskUsage)) {
+            return PrometheusConfiguration.get().getDefaultCollectDiskUsage();
+        }
+        return Boolean.parseBoolean(envCollectDiskUsage);
     }
 }
