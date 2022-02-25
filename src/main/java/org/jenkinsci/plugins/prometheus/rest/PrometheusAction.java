@@ -50,7 +50,7 @@ public class PrometheusAction implements UnprotectedRootAction {
 
     private boolean hasAccess() {
         if (PrometheusConfiguration.get().isUseAuthenticatedEndpoint()) {
-            return Jenkins.getInstance().hasPermission(Metrics.VIEW);
+            return Jenkins.get().hasPermission(Metrics.VIEW);
         }
         return true;
     }

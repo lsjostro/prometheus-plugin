@@ -24,7 +24,7 @@ public class JenkinsStatusCollector extends Collector {
                 .namespace(namespace)
                 .help("Is Jenkins ready to receive requests")
                 .create();
-        Jenkins jenkins = Jenkins.getInstance();
+        Jenkins jenkins = Jenkins.get();
         jenkinsUp.set(jenkins.getInitLevel() == hudson.init.InitMilestone.COMPLETED ? 1 : 0);
         samples.addAll(jenkinsUp.collect());
 
