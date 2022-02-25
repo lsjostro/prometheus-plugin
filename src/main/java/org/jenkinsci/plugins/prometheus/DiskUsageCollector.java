@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.prometheus;
 import io.prometheus.client.Collector;
 import io.prometheus.client.Gauge;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ public class DiskUsageCollector extends Collector {
     @Override
     @Nonnull
     public List<MetricFamilySamples> collect() {
-        if (!ConfigurationUtils.getCollectDiskUsage()) {
+        if (!PrometheusConfiguration.get().getCollectDiskUsage()) {
             return Collections.emptyList();
         }
 

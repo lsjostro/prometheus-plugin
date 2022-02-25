@@ -32,6 +32,7 @@ import jenkins.model.Jenkins;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,8 +58,9 @@ public class DiskUsageCollectorTest {
 
     @Test
     public void shouldNotProduceMetricsWhenDisabled() {
-        try (MockedStatic<ConfigurationUtils> configurationUtils = mockStatic(ConfigurationUtils.class)) {
-            configurationUtils.when(() -> ConfigurationUtils.getCollectDiskUsage()).thenReturn(false);
+        PrometheusConfiguration config = mock(PrometheusConfiguration.class);
+        try (MockedStatic<PrometheusConfiguration> configStatic = mockStatic(PrometheusConfiguration.class)) {
+            configStatic.when(() -> PrometheusConfiguration.get()).thenReturn(config);
 
             final List<MetricFamilySamples> samples = underTest.collect();
 
@@ -68,11 +70,14 @@ public class DiskUsageCollectorTest {
 
     @Test
     public void shouldProduceMetrics() throws IOException {
+        PrometheusConfiguration config = mock(PrometheusConfiguration.class);
+        when(config.getCollectDiskUsage()).thenReturn(true);
         try (MockedStatic<ConfigurationUtils> configurationUtils = mockStatic(ConfigurationUtils.class);
+             MockedStatic<PrometheusConfiguration> configStatic = mockStatic(PrometheusConfiguration.class);
              MockedStatic<Jenkins> jenkinsStatic = mockStatic(Jenkins.class)) {
             configurationUtils.when(() -> ConfigurationUtils.getNamespace()).thenReturn("foo");
             configurationUtils.when(() -> ConfigurationUtils.getSubSystem()).thenReturn("bar");
-            configurationUtils.when(() -> ConfigurationUtils.getCollectDiskUsage()).thenReturn(true);
+            configStatic.when(() -> PrometheusConfiguration.get()).thenReturn(config);
             jenkinsStatic.when(() -> Jenkins.get()).thenReturn(jenkins);
             when(jenkins.getPlugin(QuickDiskUsagePlugin.class)).thenReturn(quickDiskUsagePlugin);
 

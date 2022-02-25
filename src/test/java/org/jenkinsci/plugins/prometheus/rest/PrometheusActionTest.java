@@ -145,7 +145,7 @@ public class PrometheusActionTest {
         }
 
         private AssertStaplerResponse assertBody(String payload) {
-            assertThat(stringWriter.toString()).isEqualTo(payload);
+            assertThat(stringWriter).hasToString(payload);
             return this;
         }
 
