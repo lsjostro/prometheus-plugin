@@ -9,10 +9,17 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
+import com.cloudbees.simplediskusage.DiskItem;
+import com.cloudbees.simplediskusage.JobDiskItem;
+import com.cloudbees.simplediskusage.QuickDiskUsagePlugin;
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
+import io.prometheus.client.Collector;
+import io.prometheus.client.Collector.MetricFamilySamples;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.Path;
@@ -21,99 +28,92 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-
+import jenkins.model.Jenkins;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
-import com.cloudbees.simplediskusage.DiskItem;
-import com.cloudbees.simplediskusage.JobDiskItem;
-import com.cloudbees.simplediskusage.QuickDiskUsagePlugin;
-import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableMap;
-
-import io.prometheus.client.Collector;
-import io.prometheus.client.Collector.MetricFamilySamples;
-import jenkins.model.Jenkins;
-
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(MockitoJUnitRunner.StrictStubs.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DiskUsageCollectorTest {
 
     @Mock
-    Jenkins jenkins;
-
+    private Jenkins jenkins;
     @Mock
-    QuickDiskUsagePlugin quickDiskUsagePlugin;
+    private QuickDiskUsagePlugin quickDiskUsagePlugin;
 
-    final DiskUsageCollector underTest = new DiskUsageCollector();
+    private DiskUsageCollector underTest;
 
-    @Test
-    @PrepareForTest(ConfigurationUtils.class)
-    public void shouldNotProduceMetricsWhenDisabled() {
-        mockStatic(ConfigurationUtils.class);
-        when(ConfigurationUtils.getCollectDiskUsage()).thenReturn(false);
-
-        final List<MetricFamilySamples> samples = underTest.collect();
-
-        assertThat(samples, is(empty()));
+    @Before
+    public void setUp() {
+        underTest = new DiskUsageCollector();
     }
 
     @Test
-    @PrepareForTest({ Jenkins.class, ConfigurationUtils.class })
-    public void shouldProdueMetrics() throws IOException {
-        mockStatic(Jenkins.class, ConfigurationUtils.class);
-        when(ConfigurationUtils.getNamespace()).thenReturn("foo");
-        when(ConfigurationUtils.getSubSystem()).thenReturn("bar");
-        when(ConfigurationUtils.getCollectDiskUsage()).thenReturn(true);
-        when(Jenkins.get()).thenReturn(jenkins);
-        when(jenkins.getPlugin(QuickDiskUsagePlugin.class)).thenReturn(quickDiskUsagePlugin);
+    public void shouldNotProduceMetricsWhenDisabled() {
+        try (MockedStatic<ConfigurationUtils> configurationUtils = mockStatic(ConfigurationUtils.class)) {
+            configurationUtils.when(() -> ConfigurationUtils.getCollectDiskUsage()).thenReturn(false);
 
-        final FileStore store = mock(FileStore.class, "the file store");
-        given(store.getTotalSpace()).willReturn(4711L);
-        given(store.getUsableSpace()).willReturn(1337L);
+            final List<MetricFamilySamples> samples = underTest.collect();
 
-        final DiskItem dir = mock(DiskItem.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
-        given(dir.getDisplayName()).willReturn("dir name");
-        given(dir.getUsage()).willReturn(11L);
-        mockFileStore(dir, store);
-        final CopyOnWriteArrayList<DiskItem> directories = new CopyOnWriteArrayList<>();
-        directories.add(dir);
-        given(quickDiskUsagePlugin.getDirectoriesUsages()).willReturn(directories);
+            assertThat(samples, is(empty()));
+        }
+    }
 
-        final JobDiskItem job = mock(JobDiskItem.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
-        given(job.getFullName()).willReturn("job name");
-        given(job.getUrl()).willReturn("/job");
-        given(job.getUsage()).willReturn(7L);
-        mockFileStore(job, store);
-        final CopyOnWriteArrayList<JobDiskItem> jobs = new CopyOnWriteArrayList<>();
-        jobs.add(job);
-        given(quickDiskUsagePlugin.getJobsUsages()).willReturn(jobs);
+    @Test
+    public void shouldProduceMetrics() throws IOException {
+        try (MockedStatic<ConfigurationUtils> configurationUtils = mockStatic(ConfigurationUtils.class);
+             MockedStatic<Jenkins> jenkinsStatic = mockStatic(Jenkins.class)) {
+            configurationUtils.when(() -> ConfigurationUtils.getNamespace()).thenReturn("foo");
+            configurationUtils.when(() -> ConfigurationUtils.getSubSystem()).thenReturn("bar");
+            configurationUtils.when(() -> ConfigurationUtils.getCollectDiskUsage()).thenReturn(true);
+            jenkinsStatic.when(() -> Jenkins.get()).thenReturn(jenkins);
+            when(jenkins.getPlugin(QuickDiskUsagePlugin.class)).thenReturn(quickDiskUsagePlugin);
 
-        final List<MetricFamilySamples> samples = underTest.collect();
+            final FileStore store = mock(FileStore.class, "the file store");
+            given(store.getTotalSpace()).willReturn(4711L);
+            given(store.getUsableSpace()).willReturn(1337L);
 
-        assertThat(samples, containsInAnyOrder(
-            gauges("foo_bar_disk_usage_bytes", containsInAnyOrder(
-                sample(ImmutableMap.of("file_store", "the file store", "directory", "dir"), equalTo(11. * 1024))
-            )),
-            gauges("foo_bar_job_usage_bytes", containsInAnyOrder(
-                sample(ImmutableMap.of("file_store", "the file store", "jobName", "job name", "url", "/job"), equalTo(7. * 1024))
-            )),
-            gauges("foo_bar_file_store_capacity_bytes", containsInAnyOrder(
-                sample(ImmutableMap.of("file_store", "the file store"), equalTo(4711.))
-            )),
-            gauges("foo_bar_file_store_available_bytes", containsInAnyOrder(
-                sample(ImmutableMap.of("file_store", "the file store"), equalTo(1337.))
-            ))
-        ));
+            final DiskItem dir = mock(DiskItem.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
+            given(dir.getDisplayName()).willReturn("dir name");
+            given(dir.getUsage()).willReturn(11L);
+            mockFileStore(dir, store);
+            final CopyOnWriteArrayList<DiskItem> directories = new CopyOnWriteArrayList<>();
+            directories.add(dir);
+            given(quickDiskUsagePlugin.getDirectoriesUsages()).willReturn(directories);
+
+            final JobDiskItem job = mock(JobDiskItem.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
+            given(job.getFullName()).willReturn("job name");
+            given(job.getUrl()).willReturn("/job");
+            given(job.getUsage()).willReturn(7L);
+            mockFileStore(job, store);
+            final CopyOnWriteArrayList<JobDiskItem> jobs = new CopyOnWriteArrayList<>();
+            jobs.add(job);
+            given(quickDiskUsagePlugin.getJobsUsages()).willReturn(jobs);
+
+            final List<MetricFamilySamples> samples = underTest.collect();
+
+            assertThat(samples, containsInAnyOrder(
+                gauges("foo_bar_disk_usage_bytes", containsInAnyOrder(
+                    sample(ImmutableMap.of("file_store", "the file store", "directory", "dir"), equalTo(11. * 1024))
+                )),
+                gauges("foo_bar_job_usage_bytes", containsInAnyOrder(
+                    sample(ImmutableMap.of("file_store", "the file store", "jobName", "job name", "url", "/job"), equalTo(7. * 1024))
+                )),
+                gauges("foo_bar_file_store_capacity_bytes", containsInAnyOrder(
+                    sample(ImmutableMap.of("file_store", "the file store"), equalTo(4711.))
+                )),
+                gauges("foo_bar_file_store_available_bytes", containsInAnyOrder(
+                    sample(ImmutableMap.of("file_store", "the file store"), equalTo(1337.))
+                ))
+            ));
+        }
     }
 
     private static final void mockFileStore(DiskItem item, FileStore store) throws IOException {
