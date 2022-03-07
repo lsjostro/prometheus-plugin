@@ -131,21 +131,18 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setCollectDiskUsage(Boolean collectDiskUsage) {
         if (collectDiskUsage == null) {
-            Map<String, String> env = System.getenv();
-            this.collectDiskUsage = Boolean.parseBoolean(env.getOrDefault(COLLECT_DISK_USAGE, "true"));
+            String value = System.getenv(COLLECT_DISK_USAGE);
+            this.collectDiskUsage = value != null ? Boolean.parseBoolean(value) : DEFAULT_COLLECT_DISK_USAGE;
         }
         else {
             this.collectDiskUsage = collectDiskUsage;
         }
-
         save();
     }
 
     public boolean getCollectDiskUsage() {
         return collectDiskUsage;
     }
-
-    public boolean getDefaultCollectDiskUsage() {return DEFAULT_COLLECT_DISK_USAGE; }
 
     public long getCollectingMetricsPeriodInSeconds() {
         return collectingMetricsPeriodInSeconds;

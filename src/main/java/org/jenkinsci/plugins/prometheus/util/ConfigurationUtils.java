@@ -3,7 +3,12 @@ package org.jenkinsci.plugins.prometheus.util;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 import org.apache.commons.lang.StringUtils;
 
-public class ConfigurationUtils {
+public final class ConfigurationUtils {
+
+    private ConfigurationUtils() {
+        // prevents creating new instances
+    }
+
     public static String getNamespace() {
         // get the namespace from the environment first
         String namespace = System.getenv("PROMETHEUS_NAMESPACE");
@@ -16,13 +21,5 @@ public class ConfigurationUtils {
 
     public static String getSubSystem() {
         return "jenkins";
-    }
-
-    public static boolean getCollectDiskUsage() {
-        String envCollectDiskUsage = System.getenv("COLLECT_DISK_USAGE");
-        if(StringUtils.isEmpty(envCollectDiskUsage)) {
-            return PrometheusConfiguration.get().getDefaultCollectDiskUsage();
-        }
-        return Boolean.parseBoolean(envCollectDiskUsage);
     }
 }
