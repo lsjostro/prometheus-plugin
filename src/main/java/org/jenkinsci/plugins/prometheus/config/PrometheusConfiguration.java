@@ -62,7 +62,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public PrometheusConfiguration() {
         load();
-        setPath(urlName);
+        setPath(getPath());
         setCollectingMetricsPeriodInSeconds(collectingMetricsPeriodInSeconds);
         setCollectDiskUsage(null);
     }
@@ -97,7 +97,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     }
 
     public String getPath() {
-        return StringUtils.isEmpty(additionalPath) ? urlName : urlName + "/" + additionalPath;
+        return StringUtils.isEmpty(additionalPath) ? urlName : urlName + additionalPath;
     }
 
     public void setPath(String path) {
