@@ -53,6 +53,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     private boolean appendParamLabel = false;
     private boolean appendStatusLabel = false;
+    private boolean perBuildMetrics = false;
 
 
     private String labeledBuildParameterNames = "";
@@ -89,6 +90,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         processingDisabledBuilds = json.getBoolean("processingDisabledBuilds");
         appendParamLabel = json.getBoolean("appendParamLabel");
         appendStatusLabel = json.getBoolean("appendStatusLabel");
+        perBuildMetrics = json.getBoolean("perBuildMetrics");
 
       labeledBuildParameterNames = json.getString("labeledBuildParameterNames");
 
@@ -244,6 +246,15 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setAppendStatusLabel(boolean appendStatusLabel) {
         this.appendStatusLabel = appendStatusLabel;
+        save();
+    }
+
+    public boolean isPerBuildMetrics() {
+        return perBuildMetrics;
+    }
+
+    public void setPerBuildMetrics(boolean perBuildMetrics) {
+        this.perBuildMetrics = perBuildMetrics;
         save();
     }
 

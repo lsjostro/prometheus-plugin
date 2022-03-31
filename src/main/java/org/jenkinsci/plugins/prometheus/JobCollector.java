@@ -113,6 +113,7 @@ public class JobCollector extends Collector {
     }
 
     private final BuildMetrics lastBuildMetrics = new BuildMetrics("_last");
+    private final BuildMetrics perBuildMetrics = new BuildMetrics("");
 
     public JobCollector() {
     }
@@ -193,8 +194,15 @@ public class JobCollector extends Collector {
                 .help("Health score of a job")
                 .create();
 
+        if (PrometheusConfiguration.get().isPerBuildMetrics()) {
+            labelNameArray = Arrays.copyOf(labelNameArray, labelNameArray.length + 1);
+            labelNameArray[labelNameArray.length - 1] = "number";
+            perBuildMetrics.initCollectors(fullname, subsystem, namespace, labelNameArray, labelStageNameArray);
+        }
+
         // The lastBuildMetrics are initialized with the "base" labels
         lastBuildMetrics.initCollectors(fullname, subsystem, namespace, labelBaseNameArray, labelStageNameArray);
+
 
         Jobs.forEachJob(job -> {
             try {
@@ -220,6 +228,9 @@ public class JobCollector extends Collector {
         addSamples(samples, jobHealthScore.collect(), "Adding [{}] samples from gauge");
 
         addSamples(samples, lastBuildMetrics);
+        if (PrometheusConfiguration.get().isPerBuildMetrics()) {
+            addSamples(samples, perBuildMetrics);
+        }
 
         return samples;
     }
@@ -244,6 +255,11 @@ public class JobCollector extends Collector {
     }
 
     protected void appendJobMetrics(Job job) {
+        boolean isAppendParamLabel = PrometheusConfiguration.get().isAppendParamLabel();
+        boolean isAppendStatusLabel = PrometheusConfiguration.get().isAppendStatusLabel();
+        boolean isPerBuildMetrics = PrometheusConfiguration.get().isPerBuildMetrics();
+        String[] buildParameterNamesAsArray = PrometheusConfiguration.get().getLabeledBuildParameterNamesAsArray();
+
         // Add this to the repo as well so I can group by Github Repository
         String repoName = StringUtils.substringBetween(job.getFullName(), "/");
         if (repoName == null) {
@@ -263,13 +279,9 @@ public class JobCollector extends Collector {
 
         processRun(job, lastBuild, baseLabelValueArray, lastBuildMetrics);
 
-        boolean isAppendParamLabel = PrometheusConfiguration.get().isAppendParamLabel();
-        boolean isAppendStatusLabel = PrometheusConfiguration.get().isAppendStatusLabel();
-        String[] buildParameterNamesAsArray = PrometheusConfiguration.get().getLabeledBuildParameterNamesAsArray();
-
         Run run = lastBuild;
         while (run != null) {
-            logger.debug("getting metrics for run [{}] from job [{}]", run.getNumber(), job.getName());
+            logger.debug("getting metrics for run [{}] from job [{}], include per run metrics [{}]", run.getNumber(), job.getName(), isPerBuildMetrics);
             if (Runs.includeBuildInMetrics(run)) {
                 logger.debug("getting build info for run [{}] from job [{}]", run.getNumber(), job.getName());
 
@@ -277,7 +289,7 @@ public class JobCollector extends Collector {
                 String[] labelValueArray = baseLabelValueArray;
 
                 if (isAppendParamLabel) {
-                    String params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + String.valueOf(e.getValue())).collect(Collectors.joining(";"));
+                    String params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + e.getValue()).collect(Collectors.joining(";"));
                     labelValueArray = Arrays.copyOf(labelValueArray, labelValueArray.length + 1);
                     labelValueArray[labelValueArray.length - 1] = params;
                 }
@@ -299,7 +311,6 @@ public class JobCollector extends Collector {
                     }
                     labelValueArray[labelValueArray.length - 1] = paramValue;
                 }
-
                 long duration = run.getDuration();
                 if (!run.isBuilding()) {
                     summary.labels(labelValueArray).observe(duration);
@@ -311,6 +322,12 @@ public class JobCollector extends Collector {
                     } else {
                         jobFailedCount.labels(labelValueArray).inc();
                     }
+                }
+                if (isPerBuildMetrics) {
+                    labelValueArray = Arrays.copyOf(labelValueArray, labelValueArray.length + 1);
+                    labelValueArray[labelValueArray.length - 1] = String.valueOf(run.getNumber());
+
+                    processRun(job, run, labelValueArray, perBuildMetrics);
                 }
             }
             run = run.getPreviousBuild();
@@ -392,7 +409,7 @@ public class JobCollector extends Collector {
         }
         String jobName = job.getFullName();
         String stageName = stage.getName();
-        String[] labelValueArray = {jobName, repoName, stageName};
+        String[] labelValueArray = {jobName, repoName, String.valueOf(job.isBuildable()), stageName};
 
         if (stage.getStatus() == StatusExt.SUCCESS || stage.getStatus() == StatusExt.UNSTABLE) {
             logger.debug("getting duration for stage[{}] in run [{}] from job [{}]", stage.getName(), run.getNumber(), job.getName());
