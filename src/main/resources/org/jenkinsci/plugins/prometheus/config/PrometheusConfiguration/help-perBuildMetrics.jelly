@@ -1,0 +1,13 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <div>
+    <p class="warning">
+      Use with caution! This option generates lots of metrics which can lead to a multitude of errors and/or high resource consumption.
+      Be sure you know about the consequences and implications before using this option (e.g. Prometheus disk usage)!
+    </p>
+    <p>
+    Enable per run metrics. This will create metrics for each run of each build including status, startTime, duration, etc.
+    Make sure your total number of runs in Jenkins is limited by using the "discard old builds" feature.
+    </p>
+  </div>
+</j:jelly>
