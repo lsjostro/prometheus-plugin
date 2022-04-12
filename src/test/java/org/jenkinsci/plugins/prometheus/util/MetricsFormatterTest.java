@@ -29,7 +29,7 @@ public class MetricsFormatterTest {
         String formatString = MetricsFormatter.formatMetrics(inString);
         //master node histogram
         Assert.assertFalse(formatString.contains("jenkins_node_builds{quantile=\"0.999\",} 0.091670452\n"));
-        Assert.assertTrue(formatString.contains("jenkins_node_builds{node=\"master\",quantile=\"0.999\",} 0.091670452\n"));
+        Assert.assertTrue(formatString.contains("jenkins_node_builds{node=\"master\", quantile=\"0.999\",} 0.091670452\n"));
     }
 
     @Test
@@ -45,6 +45,6 @@ public class MetricsFormatterTest {
         String formatString = MetricsFormatter.formatMetrics(inString);
         //named node histogram
         Assert.assertFalse(formatString.contains("jenkins_node_my_node_4_builds{quantile=\"0.999\",} 0.091670452\n"));
-        Assert.assertTrue(formatString.contains("jenkins_node_builds{node=\"my_node_4\",quantile=\"0.999\",} 0.091670452\n"));
+        Assert.assertTrue(formatString.contains("jenkins_node_builds{node=\"my_node_4\", quantile=\"0.999\",} 0.091670452\n"));
     }
 }
