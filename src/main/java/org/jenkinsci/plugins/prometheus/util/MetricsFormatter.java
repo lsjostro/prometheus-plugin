@@ -8,8 +8,8 @@ public class MetricsFormatter {
         formatString = formatString.replaceAll("jenkins_node_(.*)_builds_count (.*)", "jenkins_node_builds_count{node=\"$1\"} $2");
 
         //node specific histograms
-        formatString = formatString.replaceAll("jenkins_node_builds\\{(.*)} (.*)", "jenkins_node_builds{node=\"master\",$1} $2");
-        formatString = formatString.replaceAll("jenkins_node_(.*)_builds\\{(.*)} (.*)", "jenkins_node_builds{node=\"$1\",$2} $3");
+        formatString = formatString.replaceAll("jenkins_node_builds\\{(.*)} (.*)", "jenkins_node_builds{node=\"master\", $1} $2");
+        formatString = formatString.replaceAll("jenkins_node_(.*)_builds\\{(.*)} (.*)", "jenkins_node_builds{node=\"$1\", $2} $3");
 
         return formatString;
     }
