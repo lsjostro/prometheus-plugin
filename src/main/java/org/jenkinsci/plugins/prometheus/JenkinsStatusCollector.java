@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.prometheus;
 import hudson.model.Computer;
 import io.prometheus.client.Collector;
 import io.prometheus.client.Gauge;
+import io.prometheus.client.Info;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 
@@ -16,6 +17,16 @@ public class JenkinsStatusCollector extends Collector {
         String subsystem = ConfigurationUtils.getSubSystem();
         String namespace = ConfigurationUtils.getNamespace();
         List<MetricFamilySamples> samples = new ArrayList<>();
+        
+        Jenkins jenkins = Jenkins.get();
+        Info jenkinsVersionInfo = Info.build()
+                .name("version")
+                .help("Jenkins Application Version")
+                .subsystem(subsystem)
+                .namespace(namespace)
+                .create();
+        jenkinsVersionInfo.info("version", jenkins.VERSION);
+        samples.addAll(jenkinsVersionInfo.collect());
 
         Gauge jenkinsUp = Gauge.build()
                 .name("up")
@@ -24,7 +35,6 @@ public class JenkinsStatusCollector extends Collector {
                 .namespace(namespace)
                 .help("Is Jenkins ready to receive requests")
                 .create();
-        Jenkins jenkins = Jenkins.get();
         jenkinsUp.set(jenkins.getInitLevel() == hudson.init.InitMilestone.COMPLETED ? 1 : 0);
         samples.addAll(jenkinsUp.collect());
 
