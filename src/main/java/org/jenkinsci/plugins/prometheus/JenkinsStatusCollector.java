@@ -1,10 +1,12 @@
 package org.jenkinsci.plugins.prometheus;
 
 import hudson.model.Computer;
+import hudson.model.Node;
 import io.prometheus.client.Collector;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Info;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 
 import java.util.ArrayList;
@@ -51,6 +53,32 @@ public class JenkinsStatusCollector extends Collector {
             jenkinsUptime.set(System.currentTimeMillis() - upTime);
             samples.addAll(jenkinsUptime.collect());
         }
+
+        if (!PrometheusConfiguration.get().isCollectNodeStatus()) {
+            return samples;
+        }
+
+        Gauge jenkinsNodes = Gauge.build().
+                name("nodes_online").
+                subsystem(subsystem).
+                namespace(namespace).
+                help("Jenkins nodes online status").
+                labelNames("node").
+                create();
+
+        for (Node node : jenkins.getNodes()) {
+            //Check whether the node is online or offline
+            Computer comp = node.toComputer();
+            if (comp != null) {
+                if (comp.isOnline()) { // https://javadoc.jenkins.io/hudson/model/Computer.html
+                    jenkinsNodes.labels(node.getNodeName()).set(1);
+                } else {
+                    jenkinsNodes.labels(node.getNodeName()).set(0);
+                }
+            }
+        }
+
+        samples.addAll(jenkinsNodes.collect());
 
         return samples;
     }
