@@ -11,7 +11,7 @@ import org.jenkinsci.plugins.prometheus.DiskUsageCollector;
 import org.jenkinsci.plugins.prometheus.ExecutorCollector;
 import org.jenkinsci.plugins.prometheus.JenkinsStatusCollector;
 import org.jenkinsci.plugins.prometheus.JobCollector;
-import org.jenkinsci.plugins.prometheus.util.MetricsFormatter;
+import org.jenkinsci.plugins.prometheus.util.JenkinsNodeBuildsSampleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public class DefaultPrometheusMetrics implements PrometheusMetrics {
         CollectorRegistry collectorRegistry = CollectorRegistry.defaultRegistry;
         collectorRegistry.register(new JobCollector());
         collectorRegistry.register(new JenkinsStatusCollector());
-        collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry()));
+        collectorRegistry.register(new DropwizardExports(Metrics.metricRegistry(), new JenkinsNodeBuildsSampleBuilder()));
         collectorRegistry.register(new DiskUsageCollector());
         collectorRegistry.register(new ExecutorCollector());
 
@@ -52,7 +52,7 @@ public class DefaultPrometheusMetrics implements PrometheusMetrics {
     public void collectMetrics() {
         try (StringWriter buffer = new StringWriter()) {
             TextFormat.write004(buffer, collectorRegistry.metricFamilySamples());
-            cachedMetrics.set(MetricsFormatter.formatMetrics(buffer.toString()));
+            cachedMetrics.set(buffer.toString());
         } catch (IOException e) {
             logger.debug("Unable to collect metrics");
         }
