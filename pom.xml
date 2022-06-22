@@ -59,7 +59,7 @@
     <connection>scm:git:git://github.com/jenkinsci/prometheus-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/prometheus-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/prometheus-plugin/</url>
-    <tag>prometheus-2.0.8</tag>
+    <tag>prometheus-2.0.12</tag>
   </scm>
 
   <repositories>
@@ -80,7 +80,7 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.319.x</artifactId>
-        <version>1362.v59f2f3db_80ee</version>
+        <version>1409.v7659b_c072f18</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
