@@ -59,6 +59,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private String labeledBuildParameterNames = "";
 
     private boolean collectDiskUsage = true;
+    private boolean collectNodeStatus = true;
 
 
     public PrometheusConfiguration() {
@@ -91,8 +92,9 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         appendParamLabel = json.getBoolean("appendParamLabel");
         appendStatusLabel = json.getBoolean("appendStatusLabel");
         perBuildMetrics = json.getBoolean("perBuildMetrics");
+        collectNodeStatus = json.getBoolean("collectNodeStatus");
 
-      labeledBuildParameterNames = json.getString("labeledBuildParameterNames");
+        labeledBuildParameterNames = json.getString("labeledBuildParameterNames");
 
         save();
         return super.configure(req, json);
@@ -135,8 +137,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         if (collectDiskUsage == null) {
             String value = System.getenv(COLLECT_DISK_USAGE);
             this.collectDiskUsage = value != null ? Boolean.parseBoolean(value) : DEFAULT_COLLECT_DISK_USAGE;
-        }
-        else {
+        } else {
             this.collectDiskUsage = collectDiskUsage;
         }
         save();
@@ -253,6 +254,10 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         return perBuildMetrics;
     }
 
+    public boolean isCollectNodeStatus() {
+        return collectNodeStatus;
+    }
+
     public void setPerBuildMetrics(boolean perBuildMetrics) {
         this.perBuildMetrics = perBuildMetrics;
         save();
@@ -318,10 +323,9 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     }
 
     private String[] parseParameterNamesFromStringSeparatedByComma(String stringValue) {
-        if (stringValue==null || stringValue.trim().length() < 1) {
-            return new String[] {};
+        if (stringValue == null || stringValue.trim().length() < 1) {
+            return new String[]{};
         }
         return stringValue.split("\\s*,\\s*");
     }
-
 }
