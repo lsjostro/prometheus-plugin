@@ -13,21 +13,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JenkinsStatusCollector extends Collector {
+    protected String subsystem;
+    protected String namespace;
+    protected Jenkins jenkins;
 
     @Override
     public List<MetricFamilySamples> collect() {
-        String subsystem = ConfigurationUtils.getSubSystem();
-        String namespace = ConfigurationUtils.getNamespace();
+        subsystem = ConfigurationUtils.getSubSystem();
+        namespace = ConfigurationUtils.getNamespace();
         List<MetricFamilySamples> samples = new ArrayList<>();
         
-        Jenkins jenkins = Jenkins.get();
+        jenkins = Jenkins.get();
         Info jenkinsVersionInfo = Info.build()
                 .name("version")
                 .help("Jenkins Application Version")
                 .subsystem(subsystem)
                 .namespace(namespace)
                 .create();
-        jenkinsVersionInfo.info("version", jenkins.VERSION);
+        jenkinsVersionInfo.info("version", Jenkins.VERSION);
         samples.addAll(jenkinsVersionInfo.collect());
 
         Gauge jenkinsUp = Gauge.build()
@@ -58,6 +61,12 @@ public class JenkinsStatusCollector extends Collector {
             return samples;
         }
 
+        samples.addAll(collectNodeStatus());
+
+        return samples;
+    }
+
+    protected List<MetricFamilySamples> collectNodeStatus() {
         Gauge jenkinsNodes = Gauge.build().
                 name("nodes_online").
                 subsystem(subsystem).
@@ -78,8 +87,6 @@ public class JenkinsStatusCollector extends Collector {
             }
         }
 
-        samples.addAll(jenkinsNodes.collect());
-
-        return samples;
+        return jenkinsNodes.collect();
     }
 }
