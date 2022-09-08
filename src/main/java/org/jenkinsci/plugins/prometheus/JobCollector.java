@@ -222,10 +222,10 @@ public class JobCollector extends Collector {
 
         });
 
-        addSamples(samples, summary.collect(), "Adding [{}] samples from summary");
-        addSamples(samples, jobSuccessCount.collect(), "Adding [{}] samples from counter");
-        addSamples(samples, jobFailedCount.collect(), "Adding [{}] samples from counter");
-        addSamples(samples, jobHealthScore.collect(), "Adding [{}] samples from gauge");
+        addSamples(samples, summary.collect(), "Adding [{}] samples from summary ({})");
+        addSamples(samples, jobSuccessCount.collect(), "Adding [{}] samples from counter ({})");
+        addSamples(samples, jobFailedCount.collect(), "Adding [{}] samples from counter ({})");
+        addSamples(samples, jobHealthScore.collect(), "Adding [{}] samples from gauge ({})");
 
         addSamples(samples, lastBuildMetrics);
         if (PrometheusConfiguration.get().isPerBuildMetrics()) {
@@ -236,22 +236,24 @@ public class JobCollector extends Collector {
     }
 
     private void addSamples(List<MetricFamilySamples> allSamples, List<MetricFamilySamples> newSamples, String logMessage) {
-        int sampleCount = newSamples.get(0).samples.size();
-        if (sampleCount > 0) {
-            logger.debug(logMessage, sampleCount);
-            allSamples.addAll(newSamples);
-        }
+        for (MetricFamilySamples metricFamilySample : newSamples) {
+                int sampleCount = metricFamilySample.samples.size();
+                if (sampleCount > 0) {
+                    logger.debug(logMessage, sampleCount, metricFamilySample.name);
+                    allSamples.addAll(newSamples);
+                }
+            }
     }
 
     private void addSamples(List<MetricFamilySamples> allSamples, BuildMetrics buildMetrics) {
-        addSamples(allSamples, buildMetrics.jobBuildResultOrdinal.collect(), "Adding [{}] samples from gauge");
-        addSamples(allSamples, buildMetrics.jobBuildResult.collect(), "Adding [{}] samples from gauge");
-        addSamples(allSamples, buildMetrics.jobBuildDuration.collect(), "Adding [{}] samples from gauge");
-        addSamples(allSamples, buildMetrics.jobBuildStartMillis.collect(), "Adding [{}] samples from gauge");
-        addSamples(allSamples, buildMetrics.jobBuildTestsTotal.collect(), "Adding [{}] samples from gauge");
-        addSamples(allSamples, buildMetrics.jobBuildTestsSkipped.collect(), "Adding [{}] samples from gauge");
-        addSamples(allSamples, buildMetrics.jobBuildTestsFailing.collect(), "Adding [{}] samples from gauge");
-        addSamples(allSamples, buildMetrics.stageSummary.collect(), "Adding [{}] samples from summary");
+        addSamples(allSamples, buildMetrics.jobBuildResultOrdinal.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(allSamples, buildMetrics.jobBuildResult.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(allSamples, buildMetrics.jobBuildDuration.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(allSamples, buildMetrics.jobBuildStartMillis.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(allSamples, buildMetrics.jobBuildTestsTotal.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(allSamples, buildMetrics.jobBuildTestsSkipped.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(allSamples, buildMetrics.jobBuildTestsFailing.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(allSamples, buildMetrics.stageSummary.collect(), "Adding [{}] samples from summary ({})");
     }
 
     protected void appendJobMetrics(Job job) {
