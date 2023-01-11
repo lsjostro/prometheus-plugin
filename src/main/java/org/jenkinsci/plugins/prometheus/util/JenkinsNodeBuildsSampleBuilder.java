@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A class that converts jenkins.node[.<node_name>].builds to jenkins.node.builds with a label of node=<node_name> (or master if not set)
+ * A class that converts jenkins.node[.&lt;node_name&gt;].builds to jenkins.node.builds with a label of node=&lt;node_name&gt; (or master if not set)
  * before creating a Sample
  */
 public class JenkinsNodeBuildsSampleBuilder extends DefaultSampleBuilder {
