@@ -28,7 +28,7 @@
     <metrics.version>4.1.6.1</metrics.version>
     <pipeline-rest-api.version>2.21</pipeline-rest-api.version>
 
-    <assertj-core.version>3.22.0</assertj-core.version>
+    <assertj-core.version>3.24.1</assertj-core.version>
     <JUnitParams.version>1.1.1</JUnitParams.version>
     <system-lambda.version>1.2.1</system-lambda.version>
   </properties>
