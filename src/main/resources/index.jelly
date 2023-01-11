@@ -1,0 +1,5 @@
+<?jelly escape-by-default='true'?>
+<div>
+Jenkins Prometheus Plugin expose an endpoint (default /prometheus) with metrics where a Prometheus Server can scrape.
+</div>
+
