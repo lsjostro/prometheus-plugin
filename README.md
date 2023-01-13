@@ -30,6 +30,7 @@ duration of jobs and pipeline stages
 ## Author / Maintainer
 
 [Marky Jackson](https://github.com/markyjackson-taulia)
+[Waschndolos](https://github.com/waschndolos)
 
 # Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
