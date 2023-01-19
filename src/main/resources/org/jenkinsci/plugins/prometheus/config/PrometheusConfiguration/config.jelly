@@ -47,7 +47,8 @@
       <f:textbox />
     </f:entry>
     <f:entry title="${%Collect disk usage}" field="collectDiskUsage">
-      <f:checkbox/>
+      <j:set var="readOnlyMode" value="${instance.isEnvironmentVariableSet()}"/>
+      <f:checkbox />
     </f:entry>
     <f:entry title="${%Collect node status}" field="collectNodeStatus">
       <f:checkbox/>

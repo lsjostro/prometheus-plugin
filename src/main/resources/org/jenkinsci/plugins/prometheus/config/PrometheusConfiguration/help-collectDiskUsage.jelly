@@ -3,6 +3,8 @@
   <div>
     <p>
       If prometheus should collect disk usage or not. Disable this if you are using a cloud storage provider.
+      You can overwrite the default behavior with the environment variable COLLECT_DISK_USAGE.
+      This field is disabled if the variable is set.
     </p>
   </div>
 </j:jelly>
