@@ -32,8 +32,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private static final String DEFAULT_ENDPOINT = "prometheus";
     static final String COLLECTING_METRICS_PERIOD_IN_SECONDS = "COLLECTING_METRICS_PERIOD_IN_SECONDS";
     static final long DEFAULT_COLLECTING_METRICS_PERIOD_IN_SECONDS = TimeUnit.MINUTES.toSeconds(2);
-    private static final String COLLECT_DISK_USAGE = "COLLECT_DISK_USAGE";
-    static final boolean DEFAULT_COLLECT_DISK_USAGE = true;
+    static final String COLLECT_DISK_USAGE = "COLLECT_DISK_USAGE";
 
     private String urlName = null;
     private String additionalPath;
@@ -55,6 +54,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private boolean appendStatusLabel = false;
     private boolean perBuildMetrics = false;
 
+    private boolean environmentVariableSet;
 
     private String labeledBuildParameterNames = "";
 
@@ -66,7 +66,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         load();
         setPath(getPath());
         setCollectingMetricsPeriodInSeconds(collectingMetricsPeriodInSeconds);
-        setCollectDiskUsage(null);
+        setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+        environmentVariableSet = isValidBooleanEnv(COLLECT_DISK_USAGE);
     }
 
     public static PrometheusConfiguration get() {
@@ -134,13 +135,31 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     }
 
     public void setCollectDiskUsage(Boolean collectDiskUsage) {
-        if (collectDiskUsage == null) {
-            String value = System.getenv(COLLECT_DISK_USAGE);
-            this.collectDiskUsage = value != null ? Boolean.parseBoolean(value) : DEFAULT_COLLECT_DISK_USAGE;
-        } else {
-            this.collectDiskUsage = collectDiskUsage;
-        }
+        this.collectDiskUsage = collectDiskUsage;
         save();
+    }
+
+    public void setCollectDiskUsageBasedOnEnvironmentVariableIfDefined() {
+        try {
+            this.collectDiskUsage = getBooleanEnvironmentVariableOrThrowException(COLLECT_DISK_USAGE);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Unable to parse environment variable '{}'. Must either be 'true' or 'false'. Ignoring...", COLLECT_DISK_USAGE);
+        }
+    }
+
+    private boolean getBooleanEnvironmentVariableOrThrowException(String key) throws IllegalArgumentException {
+        if (isValidBooleanEnv(key)) {
+            return Boolean.parseBoolean(System.getenv(key));
+        }
+        throw new IllegalArgumentException();
+    }
+
+    private boolean isValidBooleanEnv(String key) {
+        String value = System.getenv(key);
+        if (value != null) {
+            return ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value));
+        }
+        return false;
     }
 
     public boolean getCollectDiskUsage() {
@@ -327,5 +346,9 @@ public class PrometheusConfiguration extends GlobalConfiguration {
             return new String[]{};
         }
         return stringValue.split("\\s*,\\s*");
+    }
+
+    public boolean isEnvironmentVariableSet() {
+        return environmentVariableSet;
     }
 }

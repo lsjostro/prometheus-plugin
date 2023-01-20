@@ -100,22 +100,6 @@ public class PrometheusConfigurationTest {
     }
 
     @Test
-    public void shouldSetValueFromEnvForCollectDiskUsage() throws Exception{
-        // given
-        Mockito.doCallRealMethod().when(configuration).setCollectDiskUsage(any());
-        Mockito.when(configuration.getCollectDiskUsage()).thenCallRealMethod();
-        Boolean collectDiskUsage = null;
-
-        // when
-        withEnvironmentVariable(String.valueOf(PrometheusConfiguration.DEFAULT_COLLECT_DISK_USAGE), String.valueOf(true))
-                .execute(() -> configuration.setCollectDiskUsage(collectDiskUsage));
-        boolean actual = configuration.getCollectDiskUsage();
-
-        // then
-        assertThat(actual).isEqualTo(true);
-    }
-
-    @Test
     @Parameters(method = "wrongMetricCollectorPeriodsProvider")
     public void shouldSetDefaultValueWhenEnvCannotBeConvertedToLongORNegativeValue(String wrongValue) throws Exception {
         // given
@@ -130,6 +114,87 @@ public class PrometheusConfigurationTest {
 
         // then
         assertThat(actual).isEqualTo(PrometheusConfiguration.DEFAULT_COLLECTING_METRICS_PERIOD_IN_SECONDS);
+    }
+
+    @Test
+    public void shouldTakeDefaultValueWhenNothingConfigured() {
+        Mockito.doCallRealMethod().when(configuration).setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+        Mockito.doCallRealMethod().when(configuration).getCollectDiskUsage();
+
+        // simulate constructor call
+        configuration.setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+
+
+        assertThat(configuration.getCollectDiskUsage()).isFalse();
+    }
+
+    @Test
+    public void shouldTakeEnvironmentVariableWhenNothingConfigured() throws Exception {
+        Mockito.doCallRealMethod().when(configuration).setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+        Mockito.doCallRealMethod().when(configuration).getCollectDiskUsage();
+
+        withEnvironmentVariable(PrometheusConfiguration.COLLECT_DISK_USAGE, "false")
+                .execute(() -> {
+                    // simulate constructor call
+                    configuration.setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+                });
+
+        assertThat(configuration.getCollectDiskUsage()).isFalse();
+    }
+
+    @Test
+    public void shouldTakeDefaultIfEnvironmentVariableIsFaulty() throws Exception {
+        Mockito.doCallRealMethod().when(configuration).setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+        Mockito.doCallRealMethod().when(configuration).getCollectDiskUsage();
+
+        withEnvironmentVariable(PrometheusConfiguration.COLLECT_DISK_USAGE, "not_true_not_false")
+                .execute(() -> {
+                    // simulate constructor call
+                    configuration.setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+                });
+
+        assertThat(configuration.getCollectDiskUsage()).isFalse();
+    }
+
+    @Test
+    public void shouldTakeConfiguredValueIfEnvironmentVariableIsFaulty() throws Exception {
+        Mockito.doCallRealMethod().when(configuration).setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+        Mockito.doCallRealMethod().when(configuration).getCollectDiskUsage();
+        Mockito.doCallRealMethod().when(configuration).setCollectDiskUsage(any());
+
+        withEnvironmentVariable(PrometheusConfiguration.COLLECT_DISK_USAGE, "not_true_not_false")
+                .execute(() -> {
+
+                    // simulate user clicked on checkbox
+                    configuration.setCollectDiskUsage(true);
+
+                    // simulate constructor call
+                    configuration.setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+                });
+
+        assertThat(configuration.getCollectDiskUsage()).isTrue();
+    }
+
+    @Test
+    public void shouldTakeConfiguredValueIfItIsConfigured() {
+        Mockito.doCallRealMethod().when(configuration).setCollectDiskUsage(any());
+        Mockito.doCallRealMethod().when(configuration).getCollectDiskUsage();
+
+        // simulate someone configured it over the UI
+        configuration.setCollectDiskUsage(false);
+        assertThat(configuration.getCollectDiskUsage()).isFalse();
+
+        // simulate constructor call
+        configuration.setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+        assertThat(configuration.getCollectDiskUsage()).isFalse();
+
+        // simulate someone configured it over the UI
+        configuration.setCollectDiskUsage(true);
+        assertThat(configuration.getCollectDiskUsage()).isTrue();
+
+        // simulate constructor call
+        configuration.setCollectDiskUsageBasedOnEnvironmentVariableIfDefined();
+        assertThat(configuration.getCollectDiskUsage()).isTrue();
     }
 
     private JSONObject getDefaultConfig() {
