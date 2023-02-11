@@ -9,8 +9,10 @@ Please note that the documentation is a WIP.
 
 ## Metrics exposed
 2 types of metrics are exposed:
-- Metrics from the [Metrics-plugin](https://github.com/jenkinsci/metrics-plugin) 
-- Metrics collected by this plugin. Refer [Prometheus-plugin](docs/metrics/index.md)
+
+- Metrics from [Metrics-plugin](https://github.com/jenkinsci/metrics-plugin)
+- Metrics from this plugin. Refer [Prometheus-plugin](docs/metrics/index.md)
+
 
 ## Environment variables
 
@@ -29,6 +31,7 @@ Please note that the documentation is a WIP.
     mvn hpi:hpi
 
 ## Author / Maintainer
+
 [Waschndolos](https://github.com/waschndolos)
 
 [Marky Jackson](https://github.com/markyjackson-taulia)

@@ -1,15 +1,18 @@
 # Metrics collected by [prometheus-plugin](../../README.md)
 
-Metrics collected by this Plugin are prefixed with "default_jenkins". You can change the "default" prefix either via configuration page:
+Metrics collected by this Plugin are prefixed with "default_jenkins". 
+You can change the "default" prefix either via configuration page:
 
 "default" -> default namespace
 
-or an environment variable ```PROMETHEUS_NAMESPACE```. If the environment variable is defined this value will be taken.
+or an environment variable ```PROMETHEUS_NAMESPACE```. 
+If the environment variable is defined this value will be taken.
 
 
 ## DiskUsageCollector
 
-Required Plugin: [cloudbees-disk-usage-simple-plugin](https://github.com/jenkinsci/cloudbees-disk-usage-simple-plugin)
+Required Plugin: 
+[cloudbees-disk-usage-simple-plugin](https://github.com/jenkinsci/cloudbees-disk-usage-simple-plugin)
 
 | metric                                     | description                                                  | Prometheus Type |
 |--------------------------------------------|--------------------------------------------------------------|-----------------|
