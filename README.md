@@ -8,8 +8,11 @@ Documentation can be found [here](https://plugins.jenkins.io/prometheus)
 Please note that the documentation is a WIP.
 
 ## Metrics exposed
-Currently only metrics from the [Metrics-plugin](https://github.com/jenkinsci/metrics-plugin) and summary of build
-duration of jobs and pipeline stages
+2 types of metrics are exposed:
+
+- Metrics from [Metrics-plugin](https://github.com/jenkinsci/metrics-plugin)
+- Metrics from this plugin. Refer [Prometheus-plugin](docs/metrics/index.md)
+
 
 ## Environment variables
 
@@ -29,8 +32,9 @@ duration of jobs and pipeline stages
 
 ## Author / Maintainer
 
-[Marky Jackson](https://github.com/markyjackson-taulia)
 [Waschndolos](https://github.com/waschndolos)
+
+[Marky Jackson](https://github.com/markyjackson-taulia)
 
 # Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
