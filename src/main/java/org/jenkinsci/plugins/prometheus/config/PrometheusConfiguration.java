@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.prometheus.config;
 
 import hudson.Extension;
-import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import jenkins.YesNoMaybe;
 import jenkins.model.GlobalConfiguration;
@@ -71,8 +70,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     }
 
     public static PrometheusConfiguration get() {
-        Descriptor configuration = Jenkins.get().getDescriptor(PrometheusConfiguration.class);
-        return (PrometheusConfiguration) configuration;
+        return (PrometheusConfiguration) Jenkins.get().getDescriptor(PrometheusConfiguration.class);
     }
 
     @Override
@@ -113,7 +111,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         urlName = path.split("/")[0];
         List<String> pathParts = Arrays.asList(path.split("/"));
         additionalPath = (pathParts.size() > 1 ? "/" : "") + StringUtils.join(pathParts.subList(1, pathParts.size()), "/");
-        save();
     }
 
     public String getJobAttributeName() {
@@ -122,7 +119,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setJobAttributeName(String jobAttributeName) {
         this.jobAttributeName = jobAttributeName;
-        save();
     }
 
     public String getDefaultNamespace() {
@@ -131,12 +127,10 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setDefaultNamespace(String path) {
         this.defaultNamespace = path;
-        save();
     }
 
     public void setCollectDiskUsage(Boolean collectDiskUsage) {
         this.collectDiskUsage = collectDiskUsage;
-        save();
     }
 
     public void setCollectDiskUsageBasedOnEnvironmentVariableIfDefined() {
@@ -176,7 +170,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
         } else {
             this.collectingMetricsPeriodInSeconds = collectingMetricsPeriodInSeconds;
         }
-        save();
     }
 
     public boolean isUseAuthenticatedEndpoint() {
@@ -185,7 +178,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
-        save();
     }
 
     public boolean isCountSuccessfulBuilds() {
@@ -194,7 +186,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setCountSuccessfulBuilds(boolean countSuccessfulBuilds) {
         this.countSuccessfulBuilds = countSuccessfulBuilds;
-        save();
     }
 
     public boolean isCountUnstableBuilds() {
@@ -203,7 +194,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setCountUnstableBuilds(boolean countUnstableBuilds) {
         this.countUnstableBuilds = countUnstableBuilds;
-        save();
     }
 
     public boolean isCountFailedBuilds() {
@@ -212,7 +202,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setCountFailedBuilds(boolean countFailedBuilds) {
         this.countFailedBuilds = countFailedBuilds;
-        save();
     }
 
     public boolean isCountNotBuiltBuilds() {
@@ -221,7 +210,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setCountNotBuiltBuilds(boolean countNotBuiltBuilds) {
         this.countNotBuiltBuilds = countNotBuiltBuilds;
-        save();
     }
 
     public boolean isCountAbortedBuilds() {
@@ -230,7 +218,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setCountAbortedBuilds(boolean countAbortedBuilds) {
         this.countAbortedBuilds = countAbortedBuilds;
-        save();
     }
 
     public boolean isFetchTestResults() {
@@ -239,7 +226,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setFetchTestResults(boolean fetchTestResults) {
         this.fetchTestResults = fetchTestResults;
-        save();
     }
 
     public boolean isProcessingDisabledBuilds() {
@@ -248,7 +234,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setProcessingDisabledBuilds(boolean processingDisabledBuilds) {
         this.processingDisabledBuilds = processingDisabledBuilds;
-        save();
     }
 
     public boolean isAppendParamLabel() {
@@ -257,7 +242,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setAppendParamLabel(boolean appendParamLabel) {
         this.appendParamLabel = appendParamLabel;
-        save();
     }
 
     public boolean isAppendStatusLabel() {
@@ -266,7 +250,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setAppendStatusLabel(boolean appendStatusLabel) {
         this.appendStatusLabel = appendStatusLabel;
-        save();
     }
 
     public boolean isPerBuildMetrics() {
@@ -279,7 +262,6 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     public void setPerBuildMetrics(boolean perBuildMetrics) {
         this.perBuildMetrics = perBuildMetrics;
-        save();
     }
 
     public String getUrlName() {
