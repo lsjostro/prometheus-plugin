@@ -18,7 +18,7 @@
 
   <properties>
     <!-- when updated the io.jenkins.tools.bom:bom-X.Y.Z must be updated too -->
-    <jenkins.version>2.361</jenkins.version>
+    <jenkins.version>2.361.4</jenkins.version>
     <java.level>11</java.level>
 
     <prometheus.simpleclient.version>0.16.0</prometheus.simpleclient.version>
