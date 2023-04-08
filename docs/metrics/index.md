@@ -61,6 +61,8 @@ will just return the last build. You can enable per build metrics in the configu
 | default_jenkins_builds_<buildname>_last_last_build_tests_skipped            | Number of skipped tests during the last build                                                           | gauge           |
 | default_jenkins_builds_<buildname>_last_build_tests_failing                 | Number of failing tests during the last build                                                           | gauge           |
 | default_jenkins_builds_<buildname>_last_stage_duration_milliseconds_summary | Summary of Jenkins build times by Job and Stage in the last build                                       | summary         |
+| default_jenkins_builds_available_builds_count                               | Gauge which indicates how many builds are available for the given job                                   | gauge           |
+| default_jenkins_build_discard_active                                        | Gauge which indicates if the build discard feature is active for the job.                               | gauge           |
 
 
 
