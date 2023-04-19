@@ -31,7 +31,7 @@ public class BuildDurationSummaryTestJobTest extends MockedRunCollectorTest {
     }
 
 
-    @Override
+    @Test
     public void testCollectResult() {
         Mockito.when(mock.isBuilding()).thenReturn(false);
         Mockito.when(mock.getDuration()).thenReturn(1000L);

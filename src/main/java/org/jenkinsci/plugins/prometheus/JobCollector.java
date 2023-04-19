@@ -35,11 +35,9 @@ public class JobCollector extends Collector {
 
     private BuildDurationSummary summary;
     private Counter jobSuccessCount;
-    private Counter jobFailedCount;
+    private FailedJobCounter jobFailedCount;
     private HealthScoreGauge jobHealthScoreGauge;
-
     private NbBuildsGauge nbBuildsGauge;
-
     private BuildDiscardGauge buildDiscardGauge;
     private CurrentRunDurationGauge currentRunDurationGauge;
 
@@ -180,12 +178,7 @@ public class JobCollector extends Collector {
                 .help("Successful build count")
                 .create();
 
-        jobFailedCount = Counter.build()
-                .name(fullname + "_failed_build_count")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Failed build count")
-                .create();
+        jobFailedCount = new FailedJobCounter(labelNameArray, namespace, subsystem);
 
         // This metric uses "base" labels as it is just the health score reported
         // by the job object and the optional labels params and status don't make much
@@ -323,11 +316,10 @@ public class JobCollector extends Collector {
 
                 summary.calculateMetric(run, labelValueArray);
 
+                jobFailedCount.calculateMetric(run, labelValueArray);
                 if (runResult != null && !run.isBuilding()) {
                     if (runResult.ordinal == 0 || runResult.ordinal == 1) {
                         jobSuccessCount.labels(labelValueArray).inc();
-                    } else {
-                        jobFailedCount.labels(labelValueArray).inc();
                     }
                 }
                 if (isPerBuildMetrics) {
