@@ -2,8 +2,9 @@ package org.jenkinsci.plugins.prometheus.metrics.jobs;
 
 import hudson.model.Job;
 import io.prometheus.client.Gauge;
+import org.jenkinsci.plugins.prometheus.metrics.BaseMetricCollector;
 
-public class HealthScoreGauge extends BaseJobMetricCollector<Job, Gauge> {
+public class HealthScoreGauge extends BaseMetricCollector<Job, Gauge> {
 
     public HealthScoreGauge(String[] labelNames, String namespace, String subSystem) {
         super(labelNames, namespace, subSystem);

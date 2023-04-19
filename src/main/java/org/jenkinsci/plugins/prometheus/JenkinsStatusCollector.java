@@ -1,12 +1,12 @@
 package org.jenkinsci.plugins.prometheus;
 
-import hudson.model.Computer;
-import hudson.model.Node;
 import io.prometheus.client.Collector;
-import io.prometheus.client.Gauge;
-import io.prometheus.client.Info;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
+import org.jenkinsci.plugins.prometheus.metrics.jenkins.JenkinsUpGauge;
+import org.jenkinsci.plugins.prometheus.metrics.jenkins.JenkinsUptimeGauge;
+import org.jenkinsci.plugins.prometheus.metrics.jenkins.JenkinsVersionInfo;
+import org.jenkinsci.plugins.prometheus.metrics.jenkins.NodesOnlineGauge;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 
 import java.util.ArrayList;
@@ -21,41 +21,21 @@ public class JenkinsStatusCollector extends Collector {
     public List<MetricFamilySamples> collect() {
         subsystem = ConfigurationUtils.getSubSystem();
         namespace = ConfigurationUtils.getNamespace();
-        List<MetricFamilySamples> samples = new ArrayList<>();
-        
+
+        JenkinsUptimeGauge jenkinsUptime = new JenkinsUptimeGauge(new String[]{}, namespace, subsystem);
+        JenkinsUpGauge jenkinsUp = new JenkinsUpGauge(new String[]{}, namespace, subsystem);
+        JenkinsVersionInfo versionInfo = new JenkinsVersionInfo(new String[]{}, namespace, subsystem);
+
         jenkins = Jenkins.get();
-        Info jenkinsVersionInfo = Info.build()
-                .name("version")
-                .help("Jenkins Application Version")
-                .subsystem(subsystem)
-                .namespace(namespace)
-                .create();
-        jenkinsVersionInfo.info("version", Jenkins.VERSION);
-        samples.addAll(jenkinsVersionInfo.collect());
 
-        Gauge jenkinsUp = Gauge.build()
-                .name("up")
-                .labelNames()
-                .subsystem(subsystem)
-                .namespace(namespace)
-                .help("Is Jenkins ready to receive requests")
-                .create();
-        jenkinsUp.set(jenkins.getInitLevel() == hudson.init.InitMilestone.COMPLETED ? 1 : 0);
+        jenkinsUptime.calculateMetric(jenkins, new String[]{});
+        jenkinsUp.calculateMetric(jenkins, new String[]{});
+        versionInfo.calculateMetric(jenkins, new String[]{});
+
+        List<MetricFamilySamples> samples = new ArrayList<>();
+        samples.addAll(jenkinsUptime.collect());
         samples.addAll(jenkinsUp.collect());
-
-        Gauge jenkinsUptime = Gauge.build()
-                .name("uptime")
-                .labelNames()
-                .subsystem(subsystem)
-                .namespace(namespace)
-                .help("Time since Jenkins machine was initialized")
-                .create();
-        Computer computer = jenkins.toComputer();
-        if (computer != null) {
-            long upTime = computer.getConnectTime();
-            jenkinsUptime.set(System.currentTimeMillis() - upTime);
-            samples.addAll(jenkinsUptime.collect());
-        }
+        samples.addAll(versionInfo.collect());
 
         if (!PrometheusConfiguration.get().isCollectNodeStatus()) {
             return samples;
@@ -67,26 +47,8 @@ public class JenkinsStatusCollector extends Collector {
     }
 
     protected List<MetricFamilySamples> collectNodeStatus() {
-        Gauge jenkinsNodes = Gauge.build().
-                name("nodes_online").
-                subsystem(subsystem).
-                namespace(namespace).
-                help("Jenkins nodes online status").
-                labelNames("node").
-                create();
-
-        for (Node node : jenkins.getNodes()) {
-            //Check whether the node is online or offline
-            Computer comp = node.toComputer();
-            if (comp != null) {
-                if (comp.isOnline()) { // https://javadoc.jenkins.io/hudson/model/Computer.html
-                    jenkinsNodes.labels(node.getNodeName()).set(1);
-                } else {
-                    jenkinsNodes.labels(node.getNodeName()).set(0);
-                }
-            }
-        }
-
-        return jenkinsNodes.collect();
+        NodesOnlineGauge nodesOnlineGauge = new NodesOnlineGauge(new String[]{}, namespace, subsystem);
+        nodesOnlineGauge.calculateMetric(jenkins, new String[]{});
+        return nodesOnlineGauge.collect();
     }
 }

@@ -2,9 +2,10 @@ package org.jenkinsci.plugins.prometheus.metrics.jobs;
 
 import hudson.model.Job;
 import io.prometheus.client.Gauge;
+import org.jenkinsci.plugins.prometheus.metrics.BaseMetricCollector;
 
 
-public class NbBuildsGauge extends BaseJobMetricCollector<Job, Gauge> {
+public class NbBuildsGauge extends BaseMetricCollector<Job, Gauge> {
 
     public NbBuildsGauge(String[] labelNames, String namespace, String subsystem) {
         super(labelNames, namespace, subsystem);

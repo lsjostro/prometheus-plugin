@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.prometheus.metrics.jobs;
 
 import hudson.model.Result;
 import io.prometheus.client.Collector;
+import org.jenkinsci.plugins.prometheus.metrics.builds.BuildFailedCounter;
 import org.jenkinsci.plugins.prometheus.metrics.testutils.MockedRunCollectorTest;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -10,7 +11,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 
-public class FailedJobCounterTest extends MockedRunCollectorTest {
+public class BuildFailedCounterTest extends MockedRunCollectorTest {
 
 
     @Test
@@ -44,7 +45,7 @@ public class FailedJobCounterTest extends MockedRunCollectorTest {
     }
 
     private void testSingleCalculation() {
-        FailedJobCounter sut = new FailedJobCounter(getLabelNames(), getNamespace(), getSubSystem());
+        BuildFailedCounter sut = new BuildFailedCounter(getLabelNames(), getNamespace(), getSubSystem());
 
         sut.calculateMetric(mock, getLabelValues());
 
@@ -67,7 +68,7 @@ public class FailedJobCounterTest extends MockedRunCollectorTest {
     public void testCounterIsIncreasedOnBuildResultFailure() {
         when(mock.getResult()).thenReturn(Result.FAILURE);
 
-        FailedJobCounter sut = new FailedJobCounter(getLabelNames(), getNamespace(), getSubSystem());
+        BuildFailedCounter sut = new BuildFailedCounter(getLabelNames(), getNamespace(), getSubSystem());
 
         sut.calculateMetric(mock, getLabelValues());
         sut.calculateMetric(mock, getLabelValues());
@@ -88,7 +89,7 @@ public class FailedJobCounterTest extends MockedRunCollectorTest {
     }
 
     private void testNonFailureStateBuild() {
-        FailedJobCounter sut = new FailedJobCounter(getLabelNames(), getNamespace(), getSubSystem());
+        BuildFailedCounter sut = new BuildFailedCounter(getLabelNames(), getNamespace(), getSubSystem());
 
         sut.calculateMetric(mock, getLabelValues());
 

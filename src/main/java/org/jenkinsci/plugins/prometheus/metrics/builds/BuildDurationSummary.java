@@ -1,9 +1,10 @@
-package org.jenkinsci.plugins.prometheus.metrics.jobs;
+package org.jenkinsci.plugins.prometheus.metrics.builds;
 
 import hudson.model.Run;
 import io.prometheus.client.Summary;
+import org.jenkinsci.plugins.prometheus.metrics.BaseMetricCollector;
 
-public class BuildDurationSummary extends BaseJobMetricCollector<Run, Summary> {
+public class BuildDurationSummary extends BaseMetricCollector<Run, Summary> {
 
     public BuildDurationSummary(String[] labelNames, String namespace, String subSystem) {
         super(labelNames, namespace, subSystem);

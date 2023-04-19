@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.prometheus.metrics.jobs;
 
 import io.prometheus.client.Collector;
 
+import org.jenkinsci.plugins.prometheus.metrics.builds.BuildDurationSummary;
 import org.jenkinsci.plugins.prometheus.metrics.testutils.MockedRunCollectorTest;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;

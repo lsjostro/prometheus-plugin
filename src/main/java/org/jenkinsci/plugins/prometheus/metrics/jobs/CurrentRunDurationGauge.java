@@ -3,10 +3,11 @@ package org.jenkinsci.plugins.prometheus.metrics.jobs;
 import hudson.model.Job;
 import hudson.model.Run;
 import io.prometheus.client.Gauge;
+import org.jenkinsci.plugins.prometheus.metrics.BaseMetricCollector;
 
 import java.time.Clock;
 
-public class CurrentRunDurationGauge extends BaseJobMetricCollector<Job, Gauge> {
+public class CurrentRunDurationGauge extends BaseMetricCollector<Job, Gauge> {
 
     public CurrentRunDurationGauge(String[] labelNames, String namespace, String subSystem) {
         super(labelNames, namespace, subSystem);
