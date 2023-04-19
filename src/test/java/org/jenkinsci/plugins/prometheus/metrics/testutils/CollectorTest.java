@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.prometheus.metrics.jobs;
+package org.jenkinsci.plugins.prometheus.metrics.testutils;
 
 import io.prometheus.client.Collector;
 import org.junit.jupiter.api.Assertions;
@@ -21,6 +21,22 @@ public abstract class CollectorTest {
 
     public void validateListSize(List<Collector.MetricFamilySamples> collect, int expectedSize) {
         Assertions.assertEquals(expectedSize, collect.size());
+    }
+
+    protected String[] getLabelNames() {
+        return new String[]{"jenkins_job", "repo"};
+    }
+
+    protected String[] getLabelValues() {
+        return new String[]{"job1", "NA"};
+    }
+
+    protected String getNamespace() {
+        return "default";
+    }
+
+    protected String getSubSystem() {
+        return "jenkins";
     }
 
 }

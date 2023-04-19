@@ -26,7 +26,7 @@ public class CurrentRunDurationGaugeTest extends JobCollectorTest {
         when(currentRun.getStartTimeInMillis()).thenReturn(1000L);
         when(job.getLastBuild()).thenReturn(currentRun);
 
-        CurrentRunDurationGauge sut = new CurrentRunDurationGauge(new String[]{"jenkins_job", "repo"}, "default", "jenkins");
+        CurrentRunDurationGauge sut = new CurrentRunDurationGauge(getLabelNames(), getNamespace(), getSubSystem());
 
         try (MockedStatic<Clock> mock = Mockito.mockStatic(Clock.class)) {
 

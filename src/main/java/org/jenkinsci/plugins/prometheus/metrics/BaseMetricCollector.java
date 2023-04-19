@@ -1,11 +1,10 @@
 package org.jenkinsci.plugins.prometheus.metrics;
 
-import hudson.model.Item;
 import io.prometheus.client.Collector;
 
 import java.util.List;
 
-public abstract class BaseMetricCollector<T extends Item, I extends Collector> implements MetricCollector<T, I> {
+public abstract class BaseMetricCollector<T, I extends Collector> implements MetricCollector<T, I> {
 
     protected final static String SEPARATOR = "_";
 

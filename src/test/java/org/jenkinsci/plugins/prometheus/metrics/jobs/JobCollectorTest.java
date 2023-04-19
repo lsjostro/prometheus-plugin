@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.prometheus.metrics.jobs;
 
 
 import hudson.model.Job;
+import org.jenkinsci.plugins.prometheus.metrics.testutils.CollectorTest;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -14,4 +15,6 @@ public abstract class JobCollectorTest extends CollectorTest {
 
 
     abstract void testCollectResult();
+
+
 }

@@ -1,8 +1,6 @@
 package org.jenkinsci.plugins.prometheus.metrics;
 
-import hudson.model.Item;
 import io.prometheus.client.Collector;
-import io.prometheus.client.Gauge;
 
 import java.util.List;
 
@@ -11,7 +9,7 @@ import java.util.List;
  * {@link io.prometheus.client.SimpleCollector}
  * @param <T> - any subclass of {@link io.prometheus.client.SimpleCollector}
  */
-public interface MetricCollector<T extends Item, I extends Collector> {
+public interface MetricCollector<T, I extends Collector> {
 
     /**
      * This method contains the logic to calculate a metric value based on the given Jenkins object (e.g. Job, Run,...)

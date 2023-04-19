@@ -12,14 +12,10 @@ import io.prometheus.client.Gauge;
 import io.prometheus.client.Summary;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
-import org.jenkinsci.plugins.prometheus.metrics.jobs.BuildDiscardGauge;
-import org.jenkinsci.plugins.prometheus.metrics.jobs.CurrentRunDurationGauge;
-import org.jenkinsci.plugins.prometheus.metrics.jobs.HealthScoreGauge;
-import org.jenkinsci.plugins.prometheus.util.ArrayUtils;
+import org.jenkinsci.plugins.prometheus.metrics.jobs.*;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 import org.jenkinsci.plugins.prometheus.util.Jobs;
 import org.jenkinsci.plugins.prometheus.util.Runs;
-import org.jenkinsci.plugins.prometheus.metrics.jobs.NbBuildsGauge;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +33,7 @@ public class JobCollector extends Collector {
     private static final String NOT_AVAILABLE = "NA";
     private static final String UNDEFINED = "UNDEFINED";
 
-    private Summary summary;
+    private BuildDurationSummary summary;
     private Counter jobSuccessCount;
     private Counter jobFailedCount;
     private HealthScoreGauge jobHealthScoreGauge;
@@ -175,12 +171,7 @@ public class JobCollector extends Collector {
 
         // Below three metrics use labelNameArray which might include the optional labels
         // of "parameters" or "status"
-        summary = Summary.build()
-                .name(fullname + "_duration_milliseconds_summary")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Summary of Jenkins build times in milliseconds by Job")
-                .create();
+        summary = new BuildDurationSummary(labelNameArray, namespace, subsystem);
 
         jobSuccessCount = Counter.build()
                 .name(fullname + "_success_build_count")
@@ -329,10 +320,8 @@ public class JobCollector extends Collector {
                     }
                     labelValueArray[labelValueArray.length - 1] = paramValue;
                 }
-                long duration = run.getDuration();
-                if (!run.isBuilding()) {
-                    summary.labels(labelValueArray).observe(duration);
-                }
+
+                summary.calculateMetric(run, labelValueArray);
 
                 if (runResult != null && !run.isBuilding()) {
                     if (runResult.ordinal == 0 || runResult.ordinal == 1) {
