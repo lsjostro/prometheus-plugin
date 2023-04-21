@@ -3,8 +3,8 @@ package org.jenkinsci.plugins.prometheus;
 import hudson.model.Label;
 import hudson.model.LoadStatistics;
 import io.prometheus.client.Collector;
-import io.prometheus.client.Gauge;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.prometheus.metrics.executors.*;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +16,13 @@ public class ExecutorCollector extends Collector {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutorCollector.class);
 
-    private Gauge executorsAvailable;
-    private Gauge executorsBusy;
-    private Gauge executorsConnecting;
-    private Gauge executorsDefined;
-    private Gauge executorsIdle;
-    private Gauge executorsOnline;
-    private Gauge queueLength;
+    private ExecutorsAvailableGauge executorsAvailable;
+    private ExecutorsBusyGauge executorsBusy;
+    private ExecutorsConnectingGauge executorsConnecting;
+    private ExecutorsDefinedGauge executorsDefined;
+    private ExecutorsIdleGauge executorsIdle;
+    private ExecutorsOnlineGauge executorsOnline;
+    private ExecutorsQueueLengthGauge queueLength;
 
 
     public ExecutorCollector() {
@@ -39,60 +39,25 @@ public class ExecutorCollector extends Collector {
         String[] labelNameArray = {"label"};
 
         // Number of executors (among the online executors) that are available to carry out builds.
-        executorsAvailable = Gauge.build()
-                .name(prefix + "_available")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Executors Available")
-                .create();
+        executorsAvailable = new ExecutorsAvailableGauge(labelNameArray, namespace, subsystem, prefix);
 
         // Number of executors (among the online executors) that are carrying out builds.
-        executorsBusy = Gauge.build()
-                .name(prefix + "_busy")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Executors Busy")
-                .create();
+        executorsBusy = new ExecutorsBusyGauge(labelNameArray, namespace, subsystem, prefix);
 
         // Number of executors that are currently in the process of connecting to Jenkins.
-        executorsConnecting = Gauge.build()
-                .name(prefix + "_connecting")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Executors Connecting")
-                .create();
+        executorsConnecting = new ExecutorsConnectingGauge(labelNameArray, namespace, subsystem, prefix);
 
         // Number of executors that Jenkins currently knows, this includes all off-line agents.
-        executorsDefined = Gauge.build()
-                .name(prefix + "_defined")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Executors Defined")
-                .create();
+        executorsDefined = new ExecutorsDefinedGauge(labelNameArray, namespace, subsystem, prefix);
 
         // Number of executors that are currently on-line and idle.
-        executorsIdle = Gauge.build()
-                .name(prefix + "_idle")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Executors Idle")
-                .create();
+        executorsIdle = new ExecutorsIdleGauge(labelNameArray, namespace, subsystem, prefix);
 
         // Sum of all executors across all online computers in this label.
-        executorsOnline = Gauge.build()
-                .name(prefix + "_online")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Executors Online")
-                .create();
+        executorsOnline = new ExecutorsOnlineGauge(labelNameArray, namespace, subsystem, prefix);
 
         // Number of jobs that are in the build queue, waiting for an available executor of this label.
-        queueLength = Gauge.build()
-                .name(prefix + "_queue_length")
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNameArray)
-                .help("Executors Queue Length")
-                .create();
+        queueLength = new ExecutorsQueueLengthGauge(labelNameArray, namespace, subsystem, prefix);
 
         logger.debug("getting load statistics for Executors");
 
@@ -114,12 +79,12 @@ public class ExecutorCollector extends Collector {
 
     protected void appendExecutorMetrics(String labelDisplayName, LoadStatistics.LoadStatisticsSnapshot computeSnapshot) {
         String[] labelValueArray = {labelDisplayName};
-        executorsAvailable.labels(labelValueArray).set(computeSnapshot.getAvailableExecutors());
-        executorsBusy.labels(labelValueArray).set(computeSnapshot.getBusyExecutors());
-        executorsConnecting.labels(labelValueArray).set(computeSnapshot.getConnectingExecutors());
-        executorsDefined.labels(labelValueArray).set(computeSnapshot.getDefinedExecutors());
-        executorsIdle.labels(labelValueArray).set(computeSnapshot.getIdleExecutors());
-        executorsOnline.labels(labelValueArray).set(computeSnapshot.getOnlineExecutors());
-        queueLength.labels(labelValueArray).set(computeSnapshot.getQueueLength());
+        executorsAvailable.calculateMetric(computeSnapshot, labelValueArray);
+        executorsBusy.calculateMetric(computeSnapshot, labelValueArray);
+        executorsConnecting.calculateMetric(computeSnapshot, labelValueArray);
+        executorsDefined.calculateMetric(computeSnapshot, labelValueArray);
+        executorsIdle.calculateMetric(computeSnapshot, labelValueArray);
+        executorsOnline.calculateMetric(computeSnapshot, labelValueArray);
+        queueLength.calculateMetric(computeSnapshot, labelValueArray);;
     }
 }
