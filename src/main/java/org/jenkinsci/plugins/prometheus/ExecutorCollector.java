@@ -4,7 +4,7 @@ import hudson.model.Label;
 import hudson.model.LoadStatistics;
 import io.prometheus.client.Collector;
 import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.prometheus.metrics.executors.*;
+import org.jenkinsci.plugins.prometheus.collectors.executors.*;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
