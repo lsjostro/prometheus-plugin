@@ -45,7 +45,7 @@ public abstract class BaseMetricCollector<T, I extends Collector> implements Met
         return getBaseName() + SEPARATOR + namePrefix + SEPARATOR + name;
     }
 
-    private String getBaseName() {
+    protected String getBaseName() {
         return "builds";
     }
 
