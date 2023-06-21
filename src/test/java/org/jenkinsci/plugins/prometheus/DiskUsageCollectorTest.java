@@ -1,18 +1,5 @@
 package org.jenkinsci.plugins.prometheus;
 
-import static java.util.Objects.requireNonNull;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
-
 import com.cloudbees.simplediskusage.DiskItem;
 import com.cloudbees.simplediskusage.JobDiskItem;
 import com.cloudbees.simplediskusage.QuickDiskUsagePlugin;
@@ -20,14 +7,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import io.prometheus.client.Collector;
 import io.prometheus.client.Collector.MetricFamilySamples;
-import java.io.IOException;
-import java.nio.file.FileStore;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import jenkins.model.Jenkins;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -41,6 +20,21 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.IOException;
+import java.nio.file.FileStore;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static java.util.Objects.requireNonNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
 @RunWith(MockitoJUnitRunner.class)
 public class DiskUsageCollectorTest {
 
@@ -49,19 +43,13 @@ public class DiskUsageCollectorTest {
     @Mock
     private QuickDiskUsagePlugin quickDiskUsagePlugin;
 
-    private DiskUsageCollector underTest;
-
-    @Before
-    public void setUp() {
-        underTest = new DiskUsageCollector();
-    }
 
     @Test
     public void shouldNotProduceMetricsWhenDisabled() {
         PrometheusConfiguration config = mock(PrometheusConfiguration.class);
         try (MockedStatic<PrometheusConfiguration> configStatic = mockStatic(PrometheusConfiguration.class)) {
-            configStatic.when(() -> PrometheusConfiguration.get()).thenReturn(config);
-
+            configStatic.when(PrometheusConfiguration::get).thenReturn(config);
+            DiskUsageCollector underTest = new DiskUsageCollector();
             final List<MetricFamilySamples> samples = underTest.collect();
 
             assertThat(samples, is(empty()));
@@ -75,10 +63,10 @@ public class DiskUsageCollectorTest {
         try (MockedStatic<ConfigurationUtils> configurationUtils = mockStatic(ConfigurationUtils.class);
              MockedStatic<PrometheusConfiguration> configStatic = mockStatic(PrometheusConfiguration.class);
              MockedStatic<Jenkins> jenkinsStatic = mockStatic(Jenkins.class)) {
-            configurationUtils.when(() -> ConfigurationUtils.getNamespace()).thenReturn("foo");
-            configurationUtils.when(() -> ConfigurationUtils.getSubSystem()).thenReturn("bar");
-            configStatic.when(() -> PrometheusConfiguration.get()).thenReturn(config);
-            jenkinsStatic.when(() -> Jenkins.get()).thenReturn(jenkins);
+            configurationUtils.when(ConfigurationUtils::getNamespace).thenReturn("foo");
+            configurationUtils.when(ConfigurationUtils::getSubSystem).thenReturn("bar");
+            configStatic.when(PrometheusConfiguration::get).thenReturn(config);
+            jenkinsStatic.when(Jenkins::get).thenReturn(jenkins);
             when(jenkins.getPlugin(QuickDiskUsagePlugin.class)).thenReturn(quickDiskUsagePlugin);
 
             final FileStore store = mock(FileStore.class, "the file store");
@@ -102,8 +90,13 @@ public class DiskUsageCollectorTest {
             jobs.add(job);
             given(quickDiskUsagePlugin.getJobsUsages()).willReturn(jobs);
 
+            DiskUsageCollector underTest = new DiskUsageCollector();
             final List<MetricFamilySamples> samples = underTest.collect();
 
+            System.out.println("Size: " + samples.size());
+            for (MetricFamilySamples f :samples) {
+                System.out.println(f);
+            }
             assertThat(samples, containsInAnyOrder(
                 gauges("foo_bar_disk_usage_bytes", containsInAnyOrder(
                     sample(ImmutableMap.of("file_store", "the file store", "directory", "dir"), equalTo(11. * 1024))

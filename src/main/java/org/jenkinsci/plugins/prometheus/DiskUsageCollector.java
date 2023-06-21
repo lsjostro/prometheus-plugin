@@ -1,11 +1,19 @@
 package org.jenkinsci.plugins.prometheus;
 
+import com.cloudbees.simplediskusage.DiskItem;
+import com.cloudbees.simplediskusage.JobDiskItem;
+import hudson.model.LoadStatistics;
 import io.prometheus.client.Collector;
-import io.prometheus.client.Gauge;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.prometheus.collectors.CollectorFactory;
+import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
+import org.jenkinsci.plugins.prometheus.collectors.MetricCollector;
+import org.jenkinsci.plugins.prometheus.collectors.disk.DiskUsageBytesGauge;
+import org.jenkinsci.plugins.prometheus.collectors.disk.FileStoreAvailableGauge;
+import org.jenkinsci.plugins.prometheus.collectors.disk.FileStoreCapacityGauge;
+import org.jenkinsci.plugins.prometheus.collectors.disk.JobUsageBytesGauge;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,58 +22,18 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DiskUsageCollector extends Collector {
 
-    private static final Logger logger = LoggerFactory.getLogger(DiskUsageCollector.class);
-
-    private static Gauge newDirectoryUsageGauge() {
-        return newGaugeBuilder()
-                .name("disk_usage_bytes")
-                .labelNames("file_store", "directory")
-                .help("Disk usage of first level folder in JENKINS_HOME in bytes")
-                .create();
-    }
-
-    private static Gauge newJobUsageGauge() {
-        return newGaugeBuilder()
-                .name("job_usage_bytes")
-                .labelNames("file_store", "jobName", "url")
-                .help("Amount of disk usage (bytes) for each job in Jenkins")
-                .create();
-    }
-
-    private static Gauge newFileStoreCapacityGauge() {
-        return newGaugeBuilder()
-                .name("file_store_capacity_bytes")
-                .labelNames("file_store")
-                .help("Total size in bytes of the file stores used by Jenkins")
-                .create();
-    }
-
-    private static Gauge newFileStoreAvailableGauge() {
-        return newGaugeBuilder()
-                .name("file_store_available_bytes")
-                .labelNames("file_store")
-                .help("Estimated available space on the file stores used by Jenkins")
-                .create();
-    }
-
-    private static Gauge.Builder newGaugeBuilder() {
-        return Gauge.build()
-                .namespace(ConfigurationUtils.getNamespace())
-                .subsystem(ConfigurationUtils.getSubSystem());
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiskUsageCollector.class);
 
     @Override
     @Nonnull
     public List<MetricFamilySamples> collect() {
+
         if (!PrometheusConfiguration.get().getCollectDiskUsage()) {
             return Collections.emptyList();
         }
@@ -73,10 +41,10 @@ public class DiskUsageCollector extends Collector {
         try {
             return collectDiskUsage();
         } catch (final IOException | RuntimeException e) {
-            logger.warn("Failed to get disk usage data due to an unexpected error.", e);
+            LOGGER.warn("Failed to get disk usage data due to an unexpected error.", e);
             return Collections.emptyList();
         } catch (final java.lang.NoClassDefFoundError e) {
-            logger.warn("Cannot collect disk usage data because plugin CloudBees Disk Usage Simple is not installed: {}", e.toString());
+            LOGGER.warn("Cannot collect disk usage data because plugin CloudBees Disk Usage Simple is not installed: {}", e.toString());
             return Collections.emptyList();
         }
     }
@@ -84,52 +52,60 @@ public class DiskUsageCollector extends Collector {
     @Nonnull
     private static List<MetricFamilySamples> collectDiskUsage() throws IOException {
         final com.cloudbees.simplediskusage.QuickDiskUsagePlugin diskUsagePlugin = Jenkins.get()
-            .getPlugin(com.cloudbees.simplediskusage.QuickDiskUsagePlugin.class);
+                .getPlugin(com.cloudbees.simplediskusage.QuickDiskUsagePlugin.class);
         if (diskUsagePlugin == null) {
-            logger.warn("Cannot collect disk usage data because plugin CloudBees Disk Usage Simple is not loaded.");
+            LOGGER.warn("Cannot collect disk usage data because plugin CloudBees Disk Usage Simple is not loaded.");
             return Collections.emptyList();
         }
 
-        final List<MetricFamilySamples> samples = new ArrayList<>();
+        CollectorFactory factory = new CollectorFactory();
         final Set<FileStore> usedFileStores = new HashSet<>();
+        List<MetricCollector<DiskItem, ? extends Collector>> diskItemCollectors = new ArrayList<>();
+        diskItemCollectors.add(factory.createDiskItemCollector(CollectorType.DISK_USAGE_BYTES_GAUGE, new String[]{"file_store", "directory"}));
 
-        final Gauge directoryUsageGauge = newDirectoryUsageGauge();
         diskUsagePlugin.getDirectoriesUsages().forEach(i -> {
-                final Optional<FileStore> fileStore = getFileStore(i.getPath());
-                fileStore.ifPresent(usedFileStores::add);
-                directoryUsageGauge.labels(toLabelValue(fileStore), i.getDisplayName()).set(i.getUsage() * 1024);
+            final Optional<FileStore> fileStore = getFileStore(i.getPath());
+            fileStore.ifPresent(usedFileStores::add);
+            diskItemCollectors.forEach(c -> c.calculateMetric(i, new String[]{toLabelValue(fileStore), i.getDisplayName()}));
         });
-        samples.addAll(directoryUsageGauge.collect());
 
-        final Gauge jobUsageGauge = newJobUsageGauge();
+        List<MetricCollector<JobDiskItem, ? extends Collector>> jobDiskItemCollectors = new ArrayList<>();
+        jobDiskItemCollectors.add(factory.createJobDiskItemCollector(CollectorType.JOB_USAGE_BYTES_GAUGE, new String[]{"file_store", "jobName", "url"}));
+
         diskUsagePlugin.getJobsUsages().forEach(i -> {
-                final Optional<FileStore> fileStore = getFileStore(i.getPath());
-                fileStore.ifPresent(usedFileStores::add);
-                jobUsageGauge.labels(toLabelValue(fileStore), i.getFullName(), i.getUrl()).set(i.getUsage() * 1024);
+            final Optional<FileStore> fileStore = getFileStore(i.getPath());
+            fileStore.ifPresent(usedFileStores::add);
+            jobDiskItemCollectors.forEach(c -> c.calculateMetric(i, new String[]{toLabelValue(fileStore), i.getFullName(), i.getUrl()}));
         });
-        samples.addAll(jobUsageGauge.collect());
 
-        final Gauge fileStoreCapacityGauge = newFileStoreCapacityGauge();
-        final Gauge fileStoreAvailableGauge = newFileStoreAvailableGauge();
+        List<MetricCollector<FileStore, ? extends Collector>> fileStoreCollectors = new ArrayList<>();
+        fileStoreCollectors.add(factory.createFileStoreCollector(CollectorType.FILE_STORE_CAPACITY_GAUGE,new String[]{"file_store"} ));
+        fileStoreCollectors.add(factory.createFileStoreCollector(CollectorType.FILE_STORE_AVAILABLE_GAUGE ,new String[]{"file_store"} ));
+
         usedFileStores.forEach(store -> {
-                final String labelValue = toLabelValue(Optional.of(store));
-    
-                try {
-                    fileStoreCapacityGauge.labels(labelValue).set(store.getTotalSpace());
-                } catch (final IOException | RuntimeException e) {
-                    logger.debug("Failed to get total space of {}", store, e);
-                    fileStoreCapacityGauge.labels(labelValue).set(Double.NaN);
-                }
-    
-                try {
-                    fileStoreAvailableGauge.labels(labelValue).set(store.getUsableSpace());
-                } catch (final IOException | RuntimeException e) {
-                    logger.debug("Failed to get usable space of {}", store, e);
-                    fileStoreAvailableGauge.labels(labelValue).set(Double.NaN);
-                }
+            final String labelValue = toLabelValue(Optional.of(store));
+            fileStoreCollectors.forEach(c -> c.calculateMetric(store, new String[]{labelValue}));
         });
-        samples.addAll(fileStoreCapacityGauge.collect());
-        samples.addAll(fileStoreAvailableGauge.collect());
+
+        List<MetricFamilySamples> samples = new ArrayList<>();
+
+        samples.addAll(Stream.of(diskItemCollectors)
+                .flatMap(Collection::stream)
+                .map(MetricCollector::collect)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+
+        samples.addAll(Stream.of(jobDiskItemCollectors)
+                .flatMap(Collection::stream)
+                .map(MetricCollector::collect)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+
+        samples.addAll(Stream.of(fileStoreCollectors)
+                .flatMap(Collection::stream)
+                .map(MetricCollector::collect)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
 
         return samples;
     }
@@ -145,7 +121,7 @@ public class DiskUsageCollector extends Collector {
         try {
             return Optional.of(Files.getFileStore(file.toPath().toRealPath()));
         } catch (IOException | RuntimeException e) {
-            logger.debug("Failed to get file store for {}", file, e);
+            LOGGER.debug("Failed to get file store for {}", file, e);
             return Optional.empty();
         }
     }
