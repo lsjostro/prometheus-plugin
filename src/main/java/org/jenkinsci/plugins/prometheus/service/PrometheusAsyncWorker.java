@@ -41,7 +41,7 @@ public class PrometheusAsyncWorker extends AsyncPeriodicWork {
         prometheusMetrics.collectMetrics();
         logger.debug("Prometheus metrics collected successfully");
     }
-    
+
     @Override
     protected Level getNormalLoggingLevel() {
         return Level.FINE;

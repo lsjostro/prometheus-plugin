@@ -7,7 +7,7 @@ import java.util.List;
 
 public class NoOpMetricCollector<T, I extends Collector> implements MetricCollector<T, I> {
     @Override
-    public void calculateMetric(Object jenkinsObject, String[] labelValues) {
+    public void calculateMetric(T jenkinsObject, String[] labelValues) {
         // do nothing
     }
 
@@ -15,5 +15,10 @@ public class NoOpMetricCollector<T, I extends Collector> implements MetricCollec
     public List<Collector.MetricFamilySamples> collect() {
         // do nothing
         return new ArrayList<>();
+    }
+
+    @Override
+    public String calculateName() {
+        return "";
     }
 }

@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.prometheus.collectors.jenkins;
 import hudson.model.Computer;
 import hudson.model.Node;
 import io.prometheus.client.Gauge;
+import io.prometheus.client.SimpleCollector;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.prometheus.collectors.BaseMetricCollector;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
@@ -14,14 +15,18 @@ public class NodesOnlineGauge extends BaseMetricCollector<Jenkins, Gauge> {
     }
 
     @Override
-    protected Gauge initCollector() {
-        return Gauge.build()
-                .name(CollectorType.NODES_ONLINE_GAUGE.getName())
-                .subsystem(subsystem)
-                .namespace(namespace)
-                .help("Jenkins nodes online status")
-                .labelNames("node")
-                .create();
+    protected CollectorType getCollectorType() {
+        return CollectorType.NODES_ONLINE_GAUGE;
+    }
+
+    @Override
+    protected String getHelpText() {
+        return "Jenkins nodes online status";
+    }
+
+    @Override
+    protected SimpleCollector.Builder<?, Gauge> getCollectorBuilder() {
+        return Gauge.build();
     }
 
     @Override

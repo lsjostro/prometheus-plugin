@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.prometheus.collectors.executors;
 
 import hudson.model.LoadStatistics;
 import io.prometheus.client.Gauge;
+import io.prometheus.client.SimpleCollector;
 import org.jenkinsci.plugins.prometheus.collectors.BaseMetricCollector;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
 
@@ -13,13 +14,18 @@ public class ExecutorsAvailableGauge extends BaseMetricCollector<LoadStatistics.
     }
 
     @Override
-    protected Gauge initCollector() {
-        return Gauge.build()
-                .name(calculateName(CollectorType.EXECUTORS_AVAILABLE_GAUGE.getName()))
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNames)
-                .help("Executors Available")
-                .create();
+    protected CollectorType getCollectorType() {
+        return CollectorType.EXECUTORS_AVAILABLE_GAUGE;
+    }
+
+    @Override
+    protected String getHelpText() {
+        return "Executors Available";
+    }
+
+    @Override
+    protected SimpleCollector.Builder<?, Gauge> getCollectorBuilder() {
+        return Gauge.build();
     }
 
     @Override

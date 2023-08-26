@@ -8,8 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorFactory;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
 import org.jenkinsci.plugins.prometheus.collectors.MetricCollector;
-import org.jenkinsci.plugins.prometheus.collectors.builds.BuildCollectorFactory;
-import org.jenkinsci.plugins.prometheus.collectors.jobs.JobCollectorFactory;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 import org.jenkinsci.plugins.prometheus.util.Jobs;
 import org.jenkinsci.plugins.prometheus.util.Runs;
@@ -27,24 +25,24 @@ public class JobCollector extends Collector {
     private static final String NOT_AVAILABLE = "NA";
     private static final String UNDEFINED = "UNDEFINED";
 
-    private MetricCollector<Run, ? extends Collector> summary;
-    private MetricCollector<Run, ? extends Collector> jobSuccessCount;
-    private MetricCollector<Run, ? extends Collector> jobFailedCount;
-    private MetricCollector<Job, ? extends Collector> jobHealthScoreGauge;
-    private MetricCollector<Job, ? extends Collector> nbBuildsGauge;
-    private MetricCollector<Job, ? extends Collector> buildDiscardGauge;
-    private MetricCollector<Job, ? extends Collector> currentRunDurationGauge;
+    private MetricCollector<Run<?, ?>, ? extends Collector> summary;
+    private MetricCollector<Run<?, ?>, ? extends Collector> jobSuccessCount;
+    private MetricCollector<Run<?, ?>, ? extends Collector> jobFailedCount;
+    private MetricCollector<Job<?, ?>, ? extends Collector> jobHealthScoreGauge;
+    private MetricCollector<Job<?, ?>, ? extends Collector> nbBuildsGauge;
+    private MetricCollector<Job<?, ?>, ? extends Collector> buildDiscardGauge;
+    private MetricCollector<Job<?, ?>, ? extends Collector> currentRunDurationGauge;
 
     private static class BuildMetrics {
 
-        public MetricCollector<Run, ? extends Collector> jobBuildResultOrdinal;
-        public MetricCollector<Run, ? extends Collector> jobBuildResult;
-        public MetricCollector<Run, ? extends Collector> jobBuildStartMillis;
-        public MetricCollector<Run, ? extends Collector> jobBuildDuration;
-        public MetricCollector<Run, ? extends Collector> stageSummary;
-        public MetricCollector<Run, ? extends Collector> jobBuildTestsTotal;
-        public MetricCollector<Run, ? extends Collector> jobBuildTestsSkipped;
-        public MetricCollector<Run, ? extends Collector> jobBuildTestsFailing;
+        public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildResultOrdinal;
+        public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildResult;
+        public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildStartMillis;
+        public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildDuration;
+        public MetricCollector<Run<?, ?>, ? extends Collector> stageSummary;
+        public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildTestsTotal;
+        public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildTestsSkipped;
+        public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildTestsFailing;
 
         private final String buildPrefix;
 
@@ -176,12 +174,12 @@ public class JobCollector extends Collector {
 
     private void addSamples(List<MetricFamilySamples> allSamples, List<MetricFamilySamples> newSamples, String logMessage) {
         for (MetricFamilySamples metricFamilySample : newSamples) {
-                int sampleCount = metricFamilySample.samples.size();
-                if (sampleCount > 0) {
-                    logger.debug(logMessage, sampleCount, metricFamilySample.name);
-                    allSamples.addAll(newSamples);
-                }
+            int sampleCount = metricFamilySample.samples.size();
+            if (sampleCount > 0) {
+                logger.debug(logMessage, sampleCount, metricFamilySample.name);
+                allSamples.addAll(newSamples);
             }
+        }
     }
 
     private void addSamples(List<MetricFamilySamples> allSamples, BuildMetrics buildMetrics) {
@@ -195,7 +193,7 @@ public class JobCollector extends Collector {
         addSamples(allSamples, buildMetrics.stageSummary.collect(), "Adding [{}] samples from summary ({})");
     }
 
-    protected void appendJobMetrics(Job job) {
+    protected void appendJobMetrics(Job<?, ?> job) {
         boolean isAppendParamLabel = PrometheusConfiguration.get().isAppendParamLabel();
         boolean isAppendStatusLabel = PrometheusConfiguration.get().isAppendStatusLabel();
         boolean isPerBuildMetrics = PrometheusConfiguration.get().isPerBuildMetrics();
@@ -208,7 +206,7 @@ public class JobCollector extends Collector {
         }
         String[] baseLabelValueArray = {job.getFullName(), repoName, String.valueOf(job.isBuildable())};
 
-        Run lastBuild = job.getLastBuild();
+        Run<?, ?> lastBuild = job.getLastBuild();
         // Never built
         if (null == lastBuild) {
             logger.debug("job [{}] never built", job.getFullName());
@@ -221,7 +219,7 @@ public class JobCollector extends Collector {
         currentRunDurationGauge.calculateMetric(job, baseLabelValueArray);
         processRun(job, lastBuild, baseLabelValueArray, lastBuildMetrics);
 
-        Run run = lastBuild;
+        Run<?, ?> run = lastBuild;
         while (run != null) {
             logger.debug("getting metrics for run [{}] from job [{}], include per run metrics [{}]", run.getNumber(), job.getName(), isPerBuildMetrics);
             if (Runs.includeBuildInMetrics(run)) {
@@ -231,7 +229,7 @@ public class JobCollector extends Collector {
                 String[] labelValueArray = baseLabelValueArray;
 
                 if (isAppendParamLabel) {
-                    String params = Runs.getBuildParameters(run).entrySet().stream().map(e -> "" + e.getKey() + "=" + e.getValue()).collect(Collectors.joining(";"));
+                    String params = Runs.getBuildParameters(run).entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(";"));
                     labelValueArray = Arrays.copyOf(labelValueArray, labelValueArray.length + 1);
                     labelValueArray[labelValueArray.length - 1] = params;
                 }
@@ -269,7 +267,7 @@ public class JobCollector extends Collector {
         }
     }
 
-    private void processRun(Job job, Run run, String[] buildLabelValueArray, BuildMetrics buildMetrics) {
+    private void processRun(Job<?, ?> job, Run<?, ?> run, String[] buildLabelValueArray, BuildMetrics buildMetrics) {
         logger.debug("Processing run [{}] from job [{}]", run.getNumber(), job.getName());
         buildMetrics.jobBuildResultOrdinal.calculateMetric(run, buildLabelValueArray);
         buildMetrics.jobBuildResult.calculateMetric(run, buildLabelValueArray);

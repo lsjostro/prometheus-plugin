@@ -2,18 +2,12 @@ package org.jenkinsci.plugins.prometheus;
 
 import com.cloudbees.simplediskusage.DiskItem;
 import com.cloudbees.simplediskusage.JobDiskItem;
-import hudson.model.LoadStatistics;
 import io.prometheus.client.Collector;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorFactory;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
 import org.jenkinsci.plugins.prometheus.collectors.MetricCollector;
-import org.jenkinsci.plugins.prometheus.collectors.disk.DiskUsageBytesGauge;
-import org.jenkinsci.plugins.prometheus.collectors.disk.FileStoreAvailableGauge;
-import org.jenkinsci.plugins.prometheus.collectors.disk.FileStoreCapacityGauge;
-import org.jenkinsci.plugins.prometheus.collectors.disk.JobUsageBytesGauge;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
-import org.jenkinsci.plugins.prometheus.util.ConfigurationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,8 +73,8 @@ public class DiskUsageCollector extends Collector {
         });
 
         List<MetricCollector<FileStore, ? extends Collector>> fileStoreCollectors = new ArrayList<>();
-        fileStoreCollectors.add(factory.createFileStoreCollector(CollectorType.FILE_STORE_CAPACITY_GAUGE,new String[]{"file_store"} ));
-        fileStoreCollectors.add(factory.createFileStoreCollector(CollectorType.FILE_STORE_AVAILABLE_GAUGE ,new String[]{"file_store"} ));
+        fileStoreCollectors.add(factory.createFileStoreCollector(CollectorType.FILE_STORE_CAPACITY_GAUGE, new String[]{"file_store"}));
+        fileStoreCollectors.add(factory.createFileStoreCollector(CollectorType.FILE_STORE_AVAILABLE_GAUGE, new String[]{"file_store"}));
 
         usedFileStores.forEach(store -> {
             final String labelValue = toLabelValue(Optional.of(store));

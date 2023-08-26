@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.prometheus.collectors.executors;
 
 import hudson.model.LoadStatistics;
 import io.prometheus.client.Gauge;
+import io.prometheus.client.SimpleCollector;
 import org.jenkinsci.plugins.prometheus.collectors.BaseMetricCollector;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
 
@@ -13,13 +14,18 @@ public class ExecutorsIdleGauge extends BaseMetricCollector<LoadStatistics.LoadS
     }
 
     @Override
-    protected Gauge initCollector() {
-        return Gauge.build()
-                .name(calculateName(CollectorType.EXECUTORS_IDLE_GAUGE.getName()))
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNames)
-                .help("Executors Idle")
-                .create();
+    protected CollectorType getCollectorType() {
+        return CollectorType.EXECUTORS_IDLE_GAUGE;
+    }
+
+    @Override
+    protected String getHelpText() {
+        return "Executors Idle";
+    }
+
+    @Override
+    protected SimpleCollector.Builder<?, Gauge> getCollectorBuilder() {
+        return Gauge.build();
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
 import hudson.model.Job;
 import hudson.model.Run;
+import io.prometheus.client.SimpleCollector;
 import io.prometheus.client.Summary;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static org.jenkinsci.plugins.prometheus.util.FlowNodes.getSortedStageNodes;
 
-public class StageSummary extends BuildsMetricCollector<Run, Summary> {
+public class StageSummary extends BuildsMetricCollector<Run<?, ?>, Summary> {
 
     private static final String NOT_AVAILABLE = "NA";
     private static final Logger LOGGER = LoggerFactory.getLogger(StageSummary.class);
@@ -26,17 +27,22 @@ public class StageSummary extends BuildsMetricCollector<Run, Summary> {
     }
 
     @Override
-    protected Summary initCollector() {
-        return Summary.build()
-                .name(calculateName(CollectorType.STAGE_SUMMARY.getName()))
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNames)
-                .help("Summary of Jenkins build times by Job and Stage in the last build")
-                .create();
+    protected CollectorType getCollectorType() {
+        return CollectorType.STAGE_SUMMARY;
     }
 
     @Override
-    public void calculateMetric(Run jenkinsObject, String[] labelValues) {
+    protected String getHelpText() {
+        return "Summary of Jenkins build times by Job and Stage in the last build";
+    }
+
+    @Override
+    protected SimpleCollector.Builder<?, Summary> getCollectorBuilder() {
+        return Summary.build();
+    }
+
+    @Override
+    public void calculateMetric(Run<?, ?> jenkinsObject, String[] labelValues) {
         if (jenkinsObject.isBuilding()) {
             return;
         }

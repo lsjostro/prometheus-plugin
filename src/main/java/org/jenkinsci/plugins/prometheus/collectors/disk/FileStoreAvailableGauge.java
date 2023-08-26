@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.prometheus.collectors.disk;
 
 import io.prometheus.client.Gauge;
+import io.prometheus.client.SimpleCollector;
 import org.jenkinsci.plugins.prometheus.collectors.BaseMetricCollector;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
 import org.slf4j.Logger;
@@ -19,13 +20,18 @@ public class FileStoreAvailableGauge extends BaseMetricCollector<FileStore, Gaug
     }
 
     @Override
-    protected Gauge initCollector() {
-        return Gauge.build()
-                .name(calculateName(CollectorType.FILE_STORE_AVAILABLE_GAUGE.getName()))
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNames)
-                .help("Estimated available space on the file stores used by Jenkins")
-                .create();
+    protected CollectorType getCollectorType() {
+        return CollectorType.FILE_STORE_AVAILABLE_GAUGE;
+    }
+
+    @Override
+    protected String getHelpText() {
+        return "Estimated available space on the file stores used by Jenkins";
+    }
+
+    @Override
+    protected SimpleCollector.Builder<?, Gauge> getCollectorBuilder() {
+        return Gauge.build();
     }
 
     @Override

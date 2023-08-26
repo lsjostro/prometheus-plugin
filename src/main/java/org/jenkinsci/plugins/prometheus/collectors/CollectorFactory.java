@@ -31,11 +31,11 @@ public class CollectorFactory {
         diskCollectorFactory = new DiskCollectorFactory();
     }
 
-    public MetricCollector<Run, ? extends Collector> createRunCollector(CollectorType type, String[] labelNames, String prefix) {
+    public MetricCollector<Run<?, ?>, ? extends Collector> createRunCollector(CollectorType type, String[] labelNames, String prefix) {
         return buildCollectorFactory.createCollector(type, labelNames, prefix);
     }
 
-    public MetricCollector<Job, ? extends Collector> createJobCollector(CollectorType type, String[] labelNames) {
+    public MetricCollector<Job<?, ?>, ? extends Collector> createJobCollector(CollectorType type, String[] labelNames) {
         return jobCollectorFactory.createCollector(type, labelNames);
     }
 

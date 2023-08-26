@@ -1,7 +1,8 @@
 package org.jenkinsci.plugins.prometheus.collectors;
 
 import hudson.tasks.test.AbstractTestResultAction;
-import io.prometheus.client.Collector;
+import io.prometheus.client.Gauge;
+import io.prometheus.client.SimpleCollector;
 import org.jenkinsci.plugins.prometheus.collectors.testutils.MockedRunCollectorTest;
 import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 import org.junit.Test;
@@ -18,18 +19,32 @@ public class TestBasedMetricCollectorTest extends MockedRunCollectorTest {
 
         PrometheusConfiguration config = mock(PrometheusConfiguration.class);
         try (MockedStatic<PrometheusConfiguration> configStatic = mockStatic(PrometheusConfiguration.class)) {
-            configStatic.when(() -> PrometheusConfiguration.get()).thenReturn(config);
+            configStatic.when(PrometheusConfiguration::get).thenReturn(config);
 
-            TestBasedMetricCollector sut = new TestBasedMetricCollector(getLabelNames(), getNamespace(), getSubSystem(), "") {
-                @Override
-                protected Collector initCollector() {
-                    return null;
-                }
+            TestBasedMetricCollector<?,Gauge> sut = new TestBasedMetricCollector<>(getLabelNames(), getNamespace(), getSubSystem(), "") {
+
 
                 @Override
                 public void calculateMetric(Object jenkinsObject, String[] labelValues) {
                     // do nothing
                 }
+
+                @Override
+                protected CollectorType getCollectorType() {
+                    return CollectorType.BUILD_DURATION_GAUGE;
+                }
+
+                @Override
+                protected String getHelpText() {
+                    return null;
+                }
+
+
+                @Override
+                protected SimpleCollector.Builder<?, Gauge> getCollectorBuilder() {
+                    return Gauge.build();
+                }
+
             };
 
             Assertions.assertFalse(sut.canBeCalculated(null), "Cannot be calculated when run is null");
@@ -47,7 +62,7 @@ public class TestBasedMetricCollectorTest extends MockedRunCollectorTest {
             Assertions.assertFalse(sut.canBeCalculated(mock), "Cannot be calculated when isFetchTestResults is true but no test results found");
 
 
-            AbstractTestResultAction action = mock(AbstractTestResultAction.class);
+            AbstractTestResultAction<?> action = mock(AbstractTestResultAction.class);
             when(mock.getAction(AbstractTestResultAction.class)).thenReturn(action);
             Assertions.assertTrue(sut.canBeCalculated(mock), "Can be collected");
         }

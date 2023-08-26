@@ -5,7 +5,6 @@ import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorFactory;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
 import org.jenkinsci.plugins.prometheus.collectors.MetricCollector;
-import org.jenkinsci.plugins.prometheus.config.PrometheusConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +22,7 @@ public class JenkinsStatusCollector extends Collector {
         collectors.add(factory.createJenkinsCollector(CollectorType.JENKINS_VERSION_INFO_GAUGE, new String[]{}));
         collectors.add(factory.createJenkinsCollector(CollectorType.JENKINS_UP_GAUGE, new String[]{}));
         collectors.add(factory.createJenkinsCollector(CollectorType.JENKINS_UPTIME_GAUGE, new String[]{}));
-        collectors.add(factory.createJenkinsCollector(CollectorType.NODES_ONLINE_GAUGE, new String[]{}));
+        collectors.add(factory.createJenkinsCollector(CollectorType.NODES_ONLINE_GAUGE, new String[]{"node"}));
 
         collectors.forEach(c -> c.calculateMetric(Jenkins.get(), new String[]{}));
 

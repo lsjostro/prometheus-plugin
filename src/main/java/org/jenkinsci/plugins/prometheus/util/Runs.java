@@ -18,19 +18,19 @@ public class Runs {
             include = true;
             Result result = build.getResult();
             if (result != null) {
-                if (result == Result.ABORTED) {  
+                if (result == Result.ABORTED) {
                     include = PrometheusConfiguration.get().isCountAbortedBuilds();
-                } else if (result == Result.FAILURE) {  
+                } else if (result == Result.FAILURE) {
                     include = PrometheusConfiguration.get().isCountFailedBuilds();
-                } else if (result == Result.NOT_BUILT) {  
+                } else if (result == Result.NOT_BUILT) {
                     include = PrometheusConfiguration.get().isCountNotBuiltBuilds();
-                } else if (result == Result.SUCCESS) {  
+                } else if (result == Result.SUCCESS) {
                     include = PrometheusConfiguration.get().isCountSuccessfulBuilds();
-                } else if (result == Result.UNSTABLE) {  
+                } else if (result == Result.UNSTABLE) {
                     include = PrometheusConfiguration.get().isCountUnstableBuilds();
                 }
             }
-        }    
+        }
         return include;
     }
 

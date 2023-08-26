@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.prometheus.collectors.jenkins;
 
 import io.prometheus.client.Gauge;
+import io.prometheus.client.SimpleCollector;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.prometheus.collectors.BaseMetricCollector;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
@@ -12,14 +13,18 @@ public class JenkinsUpGauge extends BaseMetricCollector<Jenkins, Gauge> {
     }
 
     @Override
-    protected Gauge initCollector() {
-        return Gauge.build()
-                .name(CollectorType.JENKINS_UP_GAUGE.getName())
-                .labelNames()
-                .subsystem(subsystem)
-                .namespace(namespace)
-                .help("Is Jenkins ready to receive requests")
-                .create();
+    protected CollectorType getCollectorType() {
+        return CollectorType.JENKINS_UP_GAUGE;
+    }
+
+    @Override
+    protected String getHelpText() {
+        return "Is Jenkins ready to receive requests";
+    }
+
+    @Override
+    protected SimpleCollector.Builder<?, Gauge> getCollectorBuilder() {
+        return Gauge.build();
     }
 
     @Override

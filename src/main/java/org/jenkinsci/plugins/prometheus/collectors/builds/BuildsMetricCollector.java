@@ -1,9 +1,9 @@
 package org.jenkinsci.plugins.prometheus.collectors.builds;
 
-import io.prometheus.client.Collector;
+import io.prometheus.client.SimpleCollector;
 import org.jenkinsci.plugins.prometheus.collectors.BaseMetricCollector;
 
-public abstract class BuildsMetricCollector <T, I extends Collector>  extends BaseMetricCollector<T, I> {
+public abstract class BuildsMetricCollector<T, I extends SimpleCollector<?>> extends BaseMetricCollector<T, I> {
 
 
     protected BuildsMetricCollector(String[] labelNames, String namespace, String subsystem) {

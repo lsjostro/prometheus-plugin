@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.prometheus.collectors.disk;
 
 import com.cloudbees.simplediskusage.DiskItem;
 import io.prometheus.client.Gauge;
+import io.prometheus.client.SimpleCollector;
 import org.jenkinsci.plugins.prometheus.collectors.BaseMetricCollector;
 import org.jenkinsci.plugins.prometheus.collectors.CollectorType;
 
@@ -12,13 +13,18 @@ public class DiskUsageBytesGauge extends BaseMetricCollector<DiskItem, Gauge> {
     }
 
     @Override
-    protected Gauge initCollector() {
-        return Gauge.build()
-                .name(calculateName(CollectorType.DISK_USAGE_BYTES_GAUGE.getName()))
-                .subsystem(subsystem).namespace(namespace)
-                .labelNames(labelNames)
-                .help("Disk usage of first level folder in JENKINS_HOME in bytes")
-                .create();
+    protected CollectorType getCollectorType() {
+        return CollectorType.DISK_USAGE_BYTES_GAUGE;
+    }
+
+    @Override
+    protected String getHelpText() {
+        return "Disk usage of first level folder in JENKINS_HOME in bytes";
+    }
+
+    @Override
+    protected SimpleCollector.Builder<?, Gauge> getCollectorBuilder() {
+        return Gauge.build();
     }
 
     @Override

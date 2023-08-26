@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class ExecutorCollector extends Collector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorCollector.class);
+
     @Override
     public List<MetricFamilySamples> collect() {
         LOGGER.debug("Collecting executor metrics for prometheus");
@@ -41,7 +42,7 @@ public class ExecutorCollector extends Collector {
 
         Label[] labels = Jenkins.get().getLabels().toArray(new Label[0]);
         for (Label l : labels) {
-            collectors.forEach(c -> c.calculateMetric(l.loadStatistics.computeSnapshot(), new String[] {l.getDisplayName()}));
+            collectors.forEach(c -> c.calculateMetric(l.loadStatistics.computeSnapshot(), new String[]{l.getDisplayName()}));
         }
 
         return collectors.stream()
