@@ -14,6 +14,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -59,7 +60,8 @@ public class PrometheusConfiguration extends GlobalConfiguration {
     private boolean collectCodeCoverage = false;
     private boolean collectNodeStatus = true;
 
-    private DisabledMetricConfig disabledMetricConfig = new DisabledMetricConfig(new ArrayList<>());
+    @CheckForNull
+    private DisabledMetricConfig disabledMetricConfig;
 
 
     public PrometheusConfiguration() {
@@ -76,6 +78,7 @@ public class PrometheusConfiguration extends GlobalConfiguration {
 
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
+        disabledMetricConfig = null;
         req.bindJSON(this, json);
         save();
         return true;
