@@ -16,7 +16,7 @@ public class JenkinsStatusCollector extends Collector {
     public List<MetricFamilySamples> collect() {
 
         CollectorFactory factory = new CollectorFactory();
-
+        Jenkins jenkins = Jenkins.get();
         List<MetricCollector<Jenkins, ? extends Collector>> collectors = new ArrayList<>();
 
         collectors.add(factory.createJenkinsCollector(CollectorType.JENKINS_VERSION_INFO_GAUGE, new String[]{}));
@@ -24,7 +24,7 @@ public class JenkinsStatusCollector extends Collector {
         collectors.add(factory.createJenkinsCollector(CollectorType.JENKINS_UPTIME_GAUGE, new String[]{}));
         collectors.add(factory.createJenkinsCollector(CollectorType.NODES_ONLINE_GAUGE, new String[]{"node"}));
 
-        collectors.forEach(c -> c.calculateMetric(Jenkins.get(), new String[]{}));
+        collectors.forEach(c -> c.calculateMetric(jenkins, new String[]{}));
 
         return collectors.stream()
                 .map(MetricCollector::collect)
