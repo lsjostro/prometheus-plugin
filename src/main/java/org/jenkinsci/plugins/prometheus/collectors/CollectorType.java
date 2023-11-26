@@ -13,6 +13,8 @@ public enum CollectorType {
     BUILD_RESULT_ORDINAL_GAUGE("build_result_ordinal"),
     BUILD_START_GAUGE("build_start_time_milliseconds"),
     BUILD_SUCCESSFUL_COUNTER("success_build_count"),
+    BUILD_LIKELY_STUCK_GAUGE("likely_stuck"),
+
     FAILED_TESTS_GAUGE("build_tests_failing"),
     SKIPPED_TESTS_GAUGE("last_build_tests_skipped"),
     STAGE_SUMMARY("stage_duration_milliseconds_summary"),
@@ -53,9 +55,7 @@ public enum CollectorType {
     COVERAGE_FILE_MISSED("coverage_file_missed"),
     COVERAGE_FILE_TOTAL("coverage_file_total"),
 
-
-
-    ;
+    JOB_LOG_UPDATED_GAUGE("job_log_updated");
 
     private final String name;
 

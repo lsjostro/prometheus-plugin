@@ -19,6 +19,9 @@ public class ExecutorCollector extends Collector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorCollector.class);
 
+    public ExecutorCollector() {
+    }
+
     @Override
     public List<MetricFamilySamples> collect() {
         LOGGER.debug("Collecting executor metrics for prometheus");
@@ -30,13 +33,13 @@ public class ExecutorCollector extends Collector {
 
         List<MetricCollector<LoadStatistics.LoadStatisticsSnapshot, ? extends Collector>> collectors = new ArrayList<>();
 
-        collectors.add(factory.createExecutorCollector(CollectorType.EXECUTORS_AVAILABLE_GAUGE, labelNameArray, prefix));
-        collectors.add(factory.createExecutorCollector(CollectorType.EXECUTORS_BUSY_GAUGE, labelNameArray, prefix));
-        collectors.add(factory.createExecutorCollector(CollectorType.EXECUTORS_CONNECTING_GAUGE, labelNameArray, prefix));
-        collectors.add(factory.createExecutorCollector(CollectorType.EXECUTORS_DEFINED_GAUGE, labelNameArray, prefix));
-        collectors.add(factory.createExecutorCollector(CollectorType.EXECUTORS_IDLE_GAUGE, labelNameArray, prefix));
-        collectors.add(factory.createExecutorCollector(CollectorType.EXECUTORS_ONLINE_GAUGE, labelNameArray, prefix));
-        collectors.add(factory.createExecutorCollector(CollectorType.EXECUTORS_QUEUE_LENGTH_GAUGE, labelNameArray, prefix));
+        collectors.add(factory.createLoadStatisticsCollector(CollectorType.EXECUTORS_AVAILABLE_GAUGE, labelNameArray, prefix));
+        collectors.add(factory.createLoadStatisticsCollector(CollectorType.EXECUTORS_BUSY_GAUGE, labelNameArray, prefix));
+        collectors.add(factory.createLoadStatisticsCollector(CollectorType.EXECUTORS_CONNECTING_GAUGE, labelNameArray, prefix));
+        collectors.add(factory.createLoadStatisticsCollector(CollectorType.EXECUTORS_DEFINED_GAUGE, labelNameArray, prefix));
+        collectors.add(factory.createLoadStatisticsCollector(CollectorType.EXECUTORS_IDLE_GAUGE, labelNameArray, prefix));
+        collectors.add(factory.createLoadStatisticsCollector(CollectorType.EXECUTORS_ONLINE_GAUGE, labelNameArray, prefix));
+        collectors.add(factory.createLoadStatisticsCollector(CollectorType.EXECUTORS_QUEUE_LENGTH_GAUGE, labelNameArray, prefix));
 
         LOGGER.debug("getting load statistics for Executors");
 

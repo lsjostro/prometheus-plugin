@@ -13,7 +13,6 @@ import org.jenkinsci.plugins.prometheus.collectors.disk.DiskCollectorFactory;
 import org.jenkinsci.plugins.prometheus.collectors.executors.ExecutorCollectorFactory;
 import org.jenkinsci.plugins.prometheus.collectors.jenkins.JenkinsCollectorFactory;
 import org.jenkinsci.plugins.prometheus.collectors.jobs.JobCollectorFactory;
-import org.json.Cookie;
 
 import java.nio.file.FileStore;
 
@@ -52,7 +51,7 @@ public class CollectorFactory {
         return jenkinsCollectorFactory.createCollector(type, labelNames);
     }
 
-    public MetricCollector<LoadStatistics.LoadStatisticsSnapshot, ? extends Collector> createExecutorCollector(CollectorType type, String[] labelNames, String prefix) {
+    public MetricCollector<LoadStatistics.LoadStatisticsSnapshot, ? extends Collector> createLoadStatisticsCollector(CollectorType type, String[] labelNames, String prefix) {
         return executorCollectorFactory.createCollector(type, labelNames, prefix);
     }
 

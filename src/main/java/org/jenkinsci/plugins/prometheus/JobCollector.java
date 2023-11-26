@@ -32,6 +32,7 @@ public class JobCollector extends Collector {
     private MetricCollector<Job<?, ?>, ? extends Collector> nbBuildsGauge;
     private MetricCollector<Job<?, ?>, ? extends Collector> buildDiscardGauge;
     private MetricCollector<Job<?, ?>, ? extends Collector> currentRunDurationGauge;
+    private MetricCollector<Job<?,?>, ? extends Collector> logUpdatedGauge;
 
     private static class BuildMetrics {
 
@@ -43,6 +44,8 @@ public class JobCollector extends Collector {
         public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildTestsTotal;
         public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildTestsSkipped;
         public MetricCollector<Run<?, ?>, ? extends Collector> jobBuildTestsFailing;
+
+        public MetricCollector<Run<?,?>, ? extends Collector> jobBuildLikelyStuck;
 
         private final String buildPrefix;
 
@@ -60,6 +63,7 @@ public class JobCollector extends Collector {
             this.jobBuildTestsSkipped = factory.createRunCollector(CollectorType.SKIPPED_TESTS_GAUGE, labelNameArray, buildPrefix);
             this.jobBuildTestsFailing = factory.createRunCollector(CollectorType.FAILED_TESTS_GAUGE, labelNameArray, buildPrefix);
             this.stageSummary = factory.createRunCollector(CollectorType.STAGE_SUMMARY, labelStageNameArray, buildPrefix);
+            this.jobBuildLikelyStuck = factory.createRunCollector(CollectorType.BUILD_LIKELY_STUCK_GAUGE, labelNameArray, buildPrefix);
         }
     }
 
@@ -129,6 +133,8 @@ public class JobCollector extends Collector {
 
         currentRunDurationGauge = factory.createJobCollector(CollectorType.CURRENT_RUN_DURATION_GAUGE, labelBaseNameArray);
 
+        logUpdatedGauge = factory.createJobCollector(CollectorType.JOB_LOG_UPDATED_GAUGE, labelBaseNameArray);
+
         if (PrometheusConfiguration.get().isPerBuildMetrics()) {
             labelNameArray = Arrays.copyOf(labelNameArray, labelNameArray.length + 1);
             labelNameArray[labelNameArray.length - 1] = "number";
@@ -164,6 +170,7 @@ public class JobCollector extends Collector {
         addSamples(samples, nbBuildsGauge.collect(), "Adding [{}] samples from gauge ({})");
         addSamples(samples, buildDiscardGauge.collect(), "Adding [{}] samples from gauge ({})");
         addSamples(samples, currentRunDurationGauge.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(samples, logUpdatedGauge.collect(), "Adding [{}] samples from gauge ({})");
         addSamples(samples, lastBuildMetrics);
         if (PrometheusConfiguration.get().isPerBuildMetrics()) {
             addSamples(samples, perBuildMetrics);
@@ -190,6 +197,7 @@ public class JobCollector extends Collector {
         addSamples(allSamples, buildMetrics.jobBuildTestsTotal.collect(), "Adding [{}] samples from gauge ({})");
         addSamples(allSamples, buildMetrics.jobBuildTestsSkipped.collect(), "Adding [{}] samples from gauge ({})");
         addSamples(allSamples, buildMetrics.jobBuildTestsFailing.collect(), "Adding [{}] samples from gauge ({})");
+        addSamples(allSamples, buildMetrics.jobBuildLikelyStuck.collect(), "Adding [{}] samples from gauge ({})");
         addSamples(allSamples, buildMetrics.stageSummary.collect(), "Adding [{}] samples from summary ({})");
     }
 
@@ -217,6 +225,8 @@ public class JobCollector extends Collector {
         jobHealthScoreGauge.calculateMetric(job, baseLabelValueArray);
         buildDiscardGauge.calculateMetric(job, baseLabelValueArray);
         currentRunDurationGauge.calculateMetric(job, baseLabelValueArray);
+        logUpdatedGauge.calculateMetric(job, baseLabelValueArray);
+
         processRun(job, lastBuild, baseLabelValueArray, lastBuildMetrics);
 
         Run<?, ?> run = lastBuild;
@@ -278,6 +288,7 @@ public class JobCollector extends Collector {
         buildMetrics.jobBuildTestsTotal.calculateMetric(run, buildLabelValueArray);
         buildMetrics.jobBuildTestsSkipped.calculateMetric(run, buildLabelValueArray);
         buildMetrics.jobBuildTestsFailing.calculateMetric(run, buildLabelValueArray);
+        buildMetrics.jobBuildLikelyStuck.calculateMetric(run,buildLabelValueArray);
     }
 
 }
